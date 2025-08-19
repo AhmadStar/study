@@ -1,0 +1,11 @@
+{
+    "id": "vendor/family",
+    "name": "Family",
+    "namespace": "Botble\\Family\\",
+    "provider": "Botble\\Family\\Providers\\FamilyServiceProvider",
+    "author": "",
+    "url": "",
+    "version": "1.0.0",
+    "description": "",
+    "minimum_core_version": "7.5.7"
+}

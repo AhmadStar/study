@@ -1,0 +1,11 @@
+{
+    "id": "vendor/Apartment",
+    "name": "Apartment",
+    "namespace": "Botble\\Apartment\\",
+    "provider": "Botble\\Apartment\\Providers\\ApartmentServiceProvider",
+    "author": "",
+    "url": "",
+    "version": "1.0.0",
+    "description": "",
+    "minimum_core_version": "7.5.7"
+}

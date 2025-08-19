@@ -1,0 +1,11 @@
+{
+    "id": "vendor/District",
+    "name": "District",
+    "namespace": "Botble\\District\\",
+    "provider": "Botble\\District\\Providers\\DistrictServiceProvider",
+    "author": "",
+    "url": "",
+    "version": "1.0.0",
+    "description": "",
+    "minimum_core_version": "7.5.7"
+}
