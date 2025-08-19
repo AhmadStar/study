@@ -3,12 +3,14 @@
 namespace Botble\Family\Http\Controllers;
 
 use Botble\Base\Http\Actions\DeleteResourceAction;
+use Botble\Building\Models\Building;
 use Botble\Family\Http\Requests\FamilyRequest;
 use Botble\Family\Models\Family;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Family\Tables\FamilyTable;
 use Botble\Family\Forms\FamilyForm;
 use Botble\SeoHelper\Facades\SeoHelper;
+use Illuminate\Http\Request;
 use Botble\Theme\Facades\Theme;
 use Botble\Family\Http\Requests\RegisterFamilyRequest;
 use Botble\Family\Forms\RegisterFamilyForm;
@@ -106,7 +108,34 @@ public function registerFamily(RegisterFamilyRequest $request)
 
         return FamilyForm::create()->renderForm();
     }
+    public function storeF(Request $request)
+    {
+        $data = $request->all();
 
+        $validated = validator($data, [
+            'family_name' => 'required|string|max:255',
+            'family_number' => 'nullable|string|max:255',
+            'floor_number' => 'nullable|integer|min:0',
+            'family_code' => 'nullable|in:A,B,C,D,E',
+            'phone' => 'nullable|string|max:50',
+            'count_family_members' => 'nullable|integer|min:0',
+            'house_type' => 'nullable|string|max:50',
+            'status' => 'nullable|string|max:60',
+            'address' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+            'building_id' => 'required|exists:buildings,id',
+        ])->validate();
+
+        $family = \Botble\Family\Models\Family::create($validated);
+        $buildings = Building::with('persons')->get();
+       // dd($data,$validated,$family);
+        return view('plugins/building::map', ['buildings' => $buildings])->render();
+//        return response()->json([
+//            'error' => false,
+//            'message' => 'Family created successfully.',
+//            'result' => ['data' => $family]
+//        ]);
+    }
     public function store(FamilyRequest $request)
     {
         $form = FamilyForm::create()->setRequest($request);

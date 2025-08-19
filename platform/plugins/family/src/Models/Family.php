@@ -13,37 +13,25 @@ class Family extends BaseModel
     protected $table = 'families';
 
     protected $fillable = [
+        'family_name',
         'family_number',
-        'father_name',
-        'mother_name',
+        'floor_number',
         'apartment_id',
-        'family_code',
-        'village',
-        'current_location',
-        'base_location',
-        'father_career',
-        'mother_career',
+        'family_code',//codes [A,B,C,D,E]
         'address',
         'region_id',
-        'city_id',
-        'village_id',
-        'housing_type',
-        'father_certificate',
-        'mother_certificate',
         'phone',
-        'email',
         'notes',
         'status',
-        'family_members',
-        'martyrs_names',
-        'missing_names',
-        'disabled_or_widows_names',
+        'count_family_members',
+        'building_id',
+        'house_type', // نوع ملكية العقار: ملك، ايجار، غير ذلك
     ];
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'family_number' => SafeContent::class,
-        'family_members' => 'array',
+//        'family_members' => 'array',
     ];
 
     public function apartment()

@@ -1,211 +1,127 @@
 @extends('core/base::layouts.master')
 
 @section('content')
+    {{-- CSRF for AJAX --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        /* Modal overlay */
+        /* Residents Modal overlay */
+        #residentsModalContent p{
+            margin-bottom: 5px;
+        }
+        .hr, hr {
+            margin: 1rem 0;
+        }
+        #residentsModalContent h3{
+            color: rgb(13, 110, 253);
+        }
         #residentsModalOverlay {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             display: none; /* hidden initially */
             justify-content: center;
             align-items: center;
             z-index: 10000;
         }
-        /* Modal container */
+        /* Residents Modal container */
         #residentsModal {
             background: white;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            border-radius: 8px;
-            padding: 20px;
+            width: 90%; max-width: 600px;
+            max-height: 80vh; overflow-y: auto;
+            border-radius: 8px; padding: 20px;
             font-family: Arial, sans-serif;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 10px rgba(0,0,0,.3);
             position: relative;
         }
         /* Close button */
         #residentsModalClose {
             position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 28px;
-            color: #888;
-            cursor: pointer;
-            user-select: none;
+            top: 10px; right: 15px;
+            font-size: 28px; color: #888;
+            cursor: pointer; user-select: none;
         }
-        #residentsModalClose:hover {
-            color: #333;
-        }
-        /* Residents list styling */
-        #residentsModal ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        #residentsModal li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
+        #residentsModalClose:hover { color: #333; }
+        /* List styling inside modal (avatars, links) */
+        #residentsModal ul { list-style: none; padding: 0; margin: 0; }
+        #residentsModal li { display: flex; align-items: center; margin-bottom: 10px; }
         #residentsModal img.avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 12px;
+            width: 40px; height: 40px; border-radius: 50%;
+            object-fit: cover; margin-right: 12px;
         }
         #residentsModal .avatar-placeholder {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #ccc;
-            color: #555;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
-            margin-right: 12px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #ccc; color: #555;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: bold; margin-right: 12px;
         }
-        #residentsModal a {
-            color: #007BFF;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        #residentsModal a:hover {
-            text-decoration: underline;
-        }
+        #residentsModal a { color: #007BFF; text-decoration: none; font-weight: 600; }
+        #residentsModal a:hover { text-decoration: underline; }
     </style>
 
-    <div id="map" style="width: 100%; height: 600px;"></div>
+    <div id="mapBuilding">
+        {{-- Map container (button injected by JS) --}}
+        <div id="map" style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden;"></div>
 
-    <!-- Modal HTML -->
-    <div id="residentsModalOverlay">
-        <div id="residentsModal">
-            <span id="residentsModalClose">&times;</span>
-            <div id="residentsModalContent"></div>
+        {{-- Residents Modal HTML (used by map-vue.js) --}}
+        <div id="residentsModalOverlay">
+            <div id="residentsModal">
+                <span id="residentsModalClose">&times;</span>
+                <div id="residentsModalContent"></div>
+            </div>
         </div>
+        @include('plugins/building::partials.family-create-modal')
+
     </div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBokt_jID9DLiGm7hbjYfVojPRUnXE-2ig"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const center = { lat: 33.4750 + 0.0066, lng: 36.3090 };
-
-            const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 17,
-                center: center,
-                mapTypeId: 'satellite'
-            });
-
-            // Modal elements
-            const modalOverlay = document.getElementById('residentsModalOverlay');
-            const modalContent = document.getElementById('residentsModalContent');
-            const modalClose = document.getElementById('residentsModalClose');
-
-            modalClose.addEventListener('click', () => {
-                modalOverlay.style.display = 'none';
-                modalContent.innerHTML = '';
-            });
-
-            // Close modal on clicking outside modal box
-            modalOverlay.addEventListener('click', e => {
-                if (e.target === modalOverlay) {
-                    modalOverlay.style.display = 'none';
-                    modalContent.innerHTML = '';
-                }
-            });
-
-            const statusColors = {
-                'danger': '#FF0000',       // Bright Red
-                'high_risk': '#FF4500',    // Orange Red
-                'moderate': '#FFD700',     // Bright Yellow
-                'safe': '#00FF00',         // Bright Green
-                'evacuated': '#0000FF'     // Strong Blue
-            };
-
-            @foreach ($buildings as $building)
-                // Random status and color for demo
-                 statusKeys = Object.keys(statusColors);
-                 randomStatusKey = statusKeys[Math.floor(Math.random() * statusKeys.length)];
-                 color = statusColors[randomStatusKey] || '#808080';
-
-                 circle{{ $building->id }} = new google.maps.Circle({
-                    strokeColor: color,
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: color,
-                    fillOpacity: 0.6,
-                    map: map,
-                    center: { lat: {{ $building->latitude }}, lng: {{ $building->longitude }} },
-                    radius: 6
-                });
-
-                // Pulse animation for danger (red) status circles
-                if (color === '#FF0000') {
-                    let growing = true;
-                    setInterval(() => {
-                        let r = circle{{ $building->id }}.getRadius();
-                        if (growing) {
-                            r += 0.5;
-                            if (r >= 10) growing = false;
-                        } else {
-                            r -= 0.5;
-                            if (r <= 6) growing = true;
-                        }
-                        circle{{ $building->id }}.setRadius(r);
-                    }, 50);
-                }
-
-                // Click handler to open modal with residents list
-                circle{{ $building->id }}.addListener('click', function() {
-                    modalContent.innerHTML = `<p>Loading residents for <strong>{{ $building->name }}</strong>...</p>`;
-                    modalOverlay.style.display = 'flex';
-
-                    fetch(`/building/{{ $building->id }}/residents`)
-                        .then(res => {
-                            if (!res.ok) {
-                                throw new Error(`HTTP error! Status: ${res.status}`);
-                            }
-                            return res.json();
-                        })
-                        .then(data => {
-                            if (!data.length) {
-                                modalContent.innerHTML = '<p>No residents found.</p>';
-                                return;
-                            }
-
-                            let html = `<h3>{{ $building->name }}</h3><ul>`;
-
-                            data.forEach(person => {
-                                const displayName = person.full_name || 'Unknown';
-                                const avatar = person.avatar
-                                    ? `<img class="avatar" src="${person.avatar}" alt="${displayName}">`
-                                    : `<div class="avatar-placeholder">${displayName.charAt(0)}</div>`;
-
-                                html += `
-                                    <li>
-                                        ${avatar}
-                                        <a href="/person/${person.id}" target="_blank">${displayName}</a>
-                                    </li>
-                                `;
-                            });
-
-                            html += '</ul>';
-                            modalContent.innerHTML = html;
-                        })
-                        .catch(error => {
-                            console.error('Fetch error:', error);
-                            modalContent.innerHTML = '<p>Failed to load residents.</p>';
-                        });
-                });
-            @endforeach
-        });
-    </script>
-
 @endsection
+
+@push('footer')
+<script>
+    <?php  $areas = \Botble\Area\Models\Area::query()
+            ->select(['id', 'name'])
+            ->where('status', \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
+            ->orderBy('name')
+            ->get(); ?>
+            window.areas= {!! collect($areas)->map(function($b){
+                return [
+                    'id' => $b->id,
+                    'name' => $b->name,
+
+                ];
+            })->values()->toJson(JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!};
+    window.ROUTES = {
+        areas: "{{ route('building.areas.index') }}",
+        create: "{{ route('building.create.from.map') }}",
+        residentsBase: "{{ url('/building-info') }}", // used as /building/{id}/residents
+
+        // Admin bases (adjust if your admin prefix is different)
+        buildingEditBase: "{{ url('/admin/buildings') }}", // /{id}/edit
+        familyEditBase: "{{ url('/admin/families') }}",   // /{id}/edit
+        familyDeleteBase: "{{ url('/admin/families') }}", // /{id} with DELETE
+    };
+</script>
+{{-- Optionally pass buildings to JS to avoid an extra request --}}
+@if(!empty($buildings))
+    <script>
+        window.BUILDINGS = {!! collect($buildings)->map(function($b){
+                return [
+                    'id' => $b->id,
+                    'name' => $b->name,
+                    'latitude' => (float) $b->latitude,
+                    'longitude' => (float) $b->longitude,
+                ];
+            })->values()->toJson(JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!};
+    </script>
+@endif
+
+{{-- Google Maps JS API --}}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBokt_jID9DLiGm7hbjYfVojPRUnXE-2ig"></script>
+
+{{-- Vue 2 (same build your theme uses) --}}
+<script src="https://study.alkhaleej-best.com/public/themes/ripple/js/vue.js"></script>
+
+{{-- Main map logic (create button, modal, save building, residents, circles) --}}
+<script src="https://study.alkhaleej-best.com/public/themes/ripple/js/map-vue.js?v={{ time() }}"></script>
+@endpush

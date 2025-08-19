@@ -16,7 +16,11 @@ Theme::registerRoutes(function (): void {
         'namespace' => 'Botble\Family\Http\Controllers',
         'middleware' => ['web', 'core'],
     ], function (): void {
+        
         Route::group([], function (): void {
+            Route::post('/families', [\Botble\Family\Http\Controllers\FamilyController::class, 'storeF'])
+                ->name('family.store');
+
             Route::get('registerFamily', 'FamilyController@showRegistrationFamilyForm')->name('public.registerFamily');
             Route::post('registerFamily', 'FamilyController@registerFamily')->name('public.registerFamily.post');
         });

@@ -8,7 +8,7 @@ use Botble\Area\Models\Area;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Area\Tables\AreaTable;
 use Botble\Area\Forms\AreaForm;
-
+use Illuminate\Http\JsonResponse;
 class AreaController extends BaseController
 {
     public function __construct()
@@ -16,6 +16,22 @@ class AreaController extends BaseController
         $this
             ->breadcrumb()
             ->add(trans(trans('plugins/area::area.name')), route('area.index'));
+    }
+
+
+
+
+    public function getList(): JsonResponse
+    {
+        // Read from the model and return minimal fields for the dropdown
+        $areas = Area::query()
+            ->select(['id', 'name'])
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->orderBy('name')
+            ->get();
+
+        // Return as a plain array: [{id, name}, ...]
+        return response()->json($areas);
     }
 
     public function index(AreaTable $table)

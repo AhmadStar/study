@@ -8,7 +8,7 @@ use Botble\Building\Models\Building;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Building\Tables\BuildingTable;
 use Botble\Building\Forms\BuildingForm;
-
+use Illuminate\Http\Request;
 class BuildingController extends BaseController
 {
     public function __construct()
@@ -23,6 +23,27 @@ class BuildingController extends BaseController
         $this->pageTitle(trans('plugins/building::building.name'));
 
         return $table->renderTable();
+    }
+    public function storeFromMap(Request $request)
+    {
+        $data = $request->validate([
+            'name'            => 'required|string|max:255',
+            'latitude'        => 'required|numeric',
+            'longitude'       => 'required|numeric',
+            'address'         => 'nullable|string|max:500',
+            'description'     => 'nullable|string',
+            'area_id'         => 'required|exists:areas,id', // adjust table name if prefixed
+            'building_number' => 'nullable|string|max:50',
+            'floors_count'    => 'nullable|integer|min:0',
+        ]);
+
+        // Save building
+        $building = Building::create($data);
+        return response()->json([
+            'error' => false,
+            'message' => 'Building created successfully.',
+            'result' => ['data' => $building],
+        ]);
     }
 
     public function create()

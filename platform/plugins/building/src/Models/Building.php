@@ -5,6 +5,7 @@ namespace Botble\Building\Models;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Botble\Family\Models\Family;
 use Botble\Person\Models\Person;
 use Botble\Area\Models\Area;
 use Botble\Apartment\Models\Apartment;
@@ -36,5 +37,11 @@ class Building extends BaseModel
     {
         return $this->hasMany(Apartment::class);
     }
-
+    /**
+     * Get the families that belong to this building.
+     */
+    public function families()
+    {
+        return $this->hasMany(Family::class, 'building_id');
+    }
 }

@@ -21,6 +21,16 @@ class FrontendController extends BaseController
         $building = Building::with('persons')->findOrFail($id);
         return response()->json($building->persons);
     }
+    public function getBuildingInfo($id)
+    {
+        $building = Building::with(['families', 'families.persons'])->findOrFail($id);
+
+        return response()->json([
+            'error' => false,
+            'data' => $building
+        ]);
+    }
+
 
     public function personDetail($id)
     {
