@@ -33,3 +33,18 @@ Route::group(['namespace' => 'Botble\Building\Http\Controllers', 'middleware' =>
     Route::get('building/{id}/residents', [FrontendController::class, 'getResidents'])->name('building.residents');
     Route::get('building-info/{id}', [FrontendController::class, 'getBuildingInfo'])->name('building.info');
 });
+
+Route::group(['namespace' => 'Botble\Family\Http\Controllers', 'prefix' => 'admin/families', 'middleware' => ['web', 'core']], function () {
+    // عرض صفحة التعديل
+    Route::get('{id}/edit', [FrontendController::class, 'editFamily'])->name('families.edit');
+
+    // حفظ التعديلات (update)
+    Route::put('{id}', [FrontendController::class, 'updateFamily'])->name('families.update');
+
+    // Delete family
+    Route::delete('{id}/delete', [FrontendController::class, 'deleteFamily'])->name('families.delete');
+
+    // Add family
+    Route::get('{id}/add', [FrontendController::class, 'addFamily'])->name('families.add');
+
+});

@@ -14,9 +14,16 @@ class Building extends BaseModel
 {
     protected $table = 'buildings';
 
-    protected $fillable = ['name', 'latitude', 'longitude', 'address', 'description','area_id',
+    protected $fillable = [
+        'name',
+        'latitude',
+        'longitude',
+        'address',
+        'description',
+        'area_id',
         'building_number',
-        'floors_count',];
+        'floors_count',
+    ];
 
     public function persons()
     {

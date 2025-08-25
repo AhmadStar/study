@@ -17,7 +17,7 @@ class Family extends BaseModel
         'family_number',
         'floor_number',
         'apartment_id',
-        'family_code',//codes [A,B,C,D,E]
+        'family_code', // codes [A,B,C,D,E]
         'address',
         'region_id',
         'phone',
@@ -31,7 +31,7 @@ class Family extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'family_number' => SafeContent::class,
-//        'family_members' => 'array',
+        //        'family_members' => 'array',
     ];
 
     public function apartment()
@@ -43,5 +43,4 @@ class Family extends BaseModel
     {
         return $this->hasMany(Person::class);
     }
-
 }

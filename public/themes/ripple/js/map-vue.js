@@ -31,6 +31,10 @@
         //     var base = (window.ROUTES && window.ROUTES.infoBase) || '/building/';
         //     return base + buildingId + '/info';
         // },
+        BUILDING_ADD_URL: function (id) {
+            var base = (window.ROUTES && window.ROUTES.buildingEditBase) || '/admin/buildings';
+            return base + '/add';
+        },
         BUILDING_EDIT_URL: function (id) {
             var base = (window.ROUTES && window.ROUTES.buildingEditBase) || '/admin/buildings';
             return base + '/' + id + '/edit';
@@ -39,9 +43,13 @@
             var base = (window.ROUTES && window.ROUTES.familyEditBase) || '/admin/families';
             return base + '/' + id + '/edit';
         },
+        FAMILY_ADD_URL: function (buildingId) {
+            var base = (window.ROUTES && window.ROUTES.familyAdd) || '/admin/families';
+            return base + '/' + buildingId + '/add';
+        },
         FAMILY_DELETE_URL: function (id) {
             var base = (window.ROUTES && window.ROUTES.familyDeleteBase) || '/admin/families';
-            return base + '/' + id;
+            return base + '/' + id + '/delete';
         },
     };
 
@@ -167,7 +175,7 @@
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.id = 'createBuildingBtn';
-                btn.textContent = 'Create New Building';
+                btn.textContent = 'إضافة بناء جديد';
                 Object.assign(btn.style, {
                     position: 'absolute',
                     top: '12px',
@@ -256,51 +264,52 @@
             renderCreateForm: function () {
                 // Build the form HTML bound via simple ids; Vue will sync values in code (not v-model in external DOM)
                 var html = `
-          <h3 style="margin-top:0">Create New Building</h3>
-          <div id="createBuildingAlert" style="display:none;margin-bottom:10px;"></div>
-          <form id="createBuildingForm">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div>
-                <label>Name</label>
-                <input id="f_name" type="text" class="form-control" style="width:100%" required>
-              </div>
-              <div>
-                <label>Area</label>
-                <select id="f_area_id" class="form-select" style="width:100%" required>
-                  <option value="">Select area…</option>
-                </select>
-              </div>
-              <div>
-                <label>Latitude</label>
-                <input id="f_latitude" type="text" class="form-control" style="width:100%" readonly>
-              </div>
-              <div>
-                <label>Longitude</label>
-                <input id="f_longitude" type="text" class="form-control" style="width:100%" readonly>
-              </div>
-              <div style="grid-column:1 / span 2">
-                <label>Address</label>
-                <input id="f_address" type="text" class="form-control" style="width:100%">
-              </div>
-              <div>
-                <label>Building Number</label>
-                <input id="f_building_number" type="text" class="form-control" style="width:100%">
-              </div>
-              <div>
-                <label>Floors Count</label>
-                <input id="f_floors_count" type="number" min="0" class="form-control" style="width:100%">
-              </div>
-              <div style="grid-column:1 / span 2">
-                <label>Description</label>
-                <textarea id="f_description" rows="3" class="form-control" style="width:100%"></textarea>
-              </div>
-            </div>
-            <div style="margin-top:16px;text-align:right">
-              <button type="button" id="btnCancelCreate" class="btn btn-secondary" style="margin-right:8px">Cancel</button>
-              <button type="submit" id="btnSaveCreate" class="btn btn-primary">Save</button>
-            </div>
-          </form>
-        `;
+  <h3 style="margin-top:0">إنشاء مبنى جديد</h3>
+  <div id="createBuildingAlert" style="display:none;margin-bottom:10px;"></div>
+  <form id="createBuildingForm">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <label>الاسم</label>
+        <input id="f_name" type="text" class="form-control" style="width:100%" required>
+      </div>
+      <div>
+        <label>المنطقة</label>
+        <select id="f_area_id" class="form-select" style="width:100%" required>
+          <option value="">اختر المنطقة…</option>
+        </select>
+      </div>
+      <div>
+        <label>خط العرض</label>
+        <input id="f_latitude" type="text" class="form-control" style="width:100%" readonly>
+      </div>
+      <div>
+        <label>خط الطول</label>
+        <input id="f_longitude" type="text" class="form-control" style="width:100%" readonly>
+      </div>
+      <div style="grid-column:1 / span 2">
+        <label>العنوان</label>
+        <input id="f_address" type="text" class="form-control" style="width:100%">
+      </div>
+      <div>
+        <label>رقم المبنى</label>
+        <input id="f_building_number" type="text" class="form-control" style="width:100%">
+      </div>
+      <div>
+        <label>عدد الطوابق</label>
+        <input id="f_floors_count" type="number" min="0" class="form-control" style="width:100%">
+      </div>
+      <div style="grid-column:1 / span 2">
+        <label>الوصف</label>
+        <textarea id="f_description" rows="3" class="form-control" style="width:100%"></textarea>
+      </div>
+    </div>
+    <div style="margin-top:16px;text-align:right">
+      <button type="button" id="btnCancelCreate" class="btn btn-secondary" style="margin-right:8px">إلغاء</button>
+      <button type="submit" id="btnSaveCreate" class="btn btn-primary">حفظ</button>
+    </div>
+  </form>
+`;
+
                 this.createContent.innerHTML = html;
 
                 // Wire events
@@ -313,7 +322,7 @@
 
                 // Populate areas
                 var sel = qs('#f_area_id', this.createContent);
-                sel.innerHTML = '<option value="">Select area…</option>' +
+                sel.innerHTML = '<option value="">اختر المنطقة…</option>' +
                     this.areas.map(function (a) {
                         return '<option value="' + a.id + '">' + (a.name || ('#' + a.id)) + '</option>';
                     }).join('');
@@ -449,78 +458,79 @@
                                 var families = Array.isArray(building.families) ? building.families : [];
 
                                 // Local renderer so we can re-render after deletes
-                                function render() {
-                                    var header = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div>
-            <h3 style="margin:0">${building.name || ('#' + building.id)}</h3>
-            <div style="margin-top:6px;font-size:13px;color:#555">
-              <span style="display:inline-block;background:#f1f3f5;border:1px solid #e9ecef;border-radius:12px;padding:4px 8px;margin-right:6px">
-                <strong>Number:</strong> ${building.building_number || '—'}
-              </span>
-              <span style="display:inline-block;background:#f1f3f5;border:1px solid #e9ecef;border-radius:12px;padding:4px 8px;margin-right:6px">
-                <strong>Floors:</strong> ${building.floors_count ?? '—'}
-              </span>
-              <span style="display:inline-block;background:#f1f3f5;border:1px solid #e9ecef;border-radius:12px;padding:4px 8px">
-                <strong>Families:</strong> ${families.length}
-              </span>
+function render() {
+    var header = `
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+  <div>
+    <h3 style="margin:0">${building.name || ('#' + building.id)}</h3>
+    <div style="margin-top:6px;font-size:13px;color:#555">
+      <span style="display:inline-block;background:#f1f3f5;border:1px solid #e9ecef;border-radius:12px;padding:4px 8px;margin-right:6px">
+        <strong>رقم المبنى:</strong> ${building.building_number || '—'}
+      </span>
+      <span style="display:inline-block;background:#f1f3f5;border:1px solid #e9ecef;border-radius:12px;padding:4px 8px;margin-right:6px">
+        <strong>عدد الطوابق:</strong> ${building.floors_count ?? '—'}
+      </span>
+      <span style="display:inline-block;background:#f1f3f5;border:1px solid #e9ecef;border-radius:12px;padding:4px 8px">
+        <strong>عدد العائلات:</strong> ${families.length}
+      </span>
+    </div>
+    <div style="margin-top:8px;color:#333"><strong>العنوان:</strong> ${building.address || '—'}</div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-shrink:0">
+    <button type="button" class="btn btn-primary" data-action="add-family" data-building-id="${building.id}" style="padding:8px 12px;border-radius:6px">+ إضافة عائلة</button>
+    <button type="button" class="btn btn-secondary" data-action="edit-building" style="padding:8px 12px;border-radius:6px">تعديل المبنى</button>
+  </div>
+</div>
+<hr style="margin:12px 0">
+`;
+
+    var list;
+    if (!families.length) {
+        list = `
+  <div style="background:#fff3cd;border:1px solid #ffeeba;color:#856404;border-radius:6px;padding:10px 12px;margin:8px 0">
+    لا توجد عائلات في هذا المبنى.
+  </div>
+`;
+    } else {
+        list = `
+  <div>
+    <h4 style="margin:0 0 8px">العائلات</h4>
+    <ul style="list-style:none;padding:0;margin:0">
+      ${families.map(function (family) {
+            var members = (family.count_family_members != null) ? family.count_family_members : '—';
+            var houseType = family.house_type ? `<span style="display:inline-block;background:#eef7ff;border:1px solid #d2e7ff;border-radius:12px;padding:2px 8px;margin-left:6px;font-size:12px">${family.house_type}</span>` : '';
+            return `
+        <li style="border:1px solid #e9ecef;border-radius:10px;padding:10px 12px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div style="min-width:0">
+              <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                ${family.family_name || 'عائلة بدون اسم'} ${houseType}
+              </div>
+              <div style="font-size:13px;color:#555;margin-top:3px">
+                <span style="margin-right:10px"><strong>عدد الأفراد:</strong> ${members}</span>
+                ${family.family_code ? `<span style="margin-right:10px"><strong>الرمز:</strong> ${family.family_code}</span>` : ''}
+                ${family.floor_number != null ? `<span style="margin-right:10px"><strong>الطابق:</strong> ${family.floor_number}</span>` : ''}
+              </div>
+              ${family.address ? `<div style="font-size:13px;color:#666;margin-top:3px">${family.address}</div>` : ''}
             </div>
-            <div style="margin-top:8px;color:#333"><strong>Address:</strong> ${building.address || '—'}</div>
+            <div style="display:flex;gap:6px;flex-shrink:0">
+              <button type="button" class="btn btn-light" data-action="edit-family" data-family-id="${family.id}" style="padding:6px 10px;border:1px solid #ced4da;border-radius:6px">تعديل</button>
+              <button type="button" class="btn btn-danger" data-action="delete-family" data-family-id="${family.id}" style="padding:6px 10px;border-radius:6px">حذف</button>
+            </div>
           </div>
-
-          <div style="display:flex;gap:8px;flex-shrink:0">
-            <button type="button" class="btn btn-primary" data-action="add-family" style="padding:8px 12px;border-radius:6px">+ Add Family</button>
-            <button type="button" class="btn btn-secondary" data-action="edit-building" style="padding:8px 12px;border-radius:6px">Edit Building</button>
-          </div>
-        </div>
-        <hr style="margin:12px 0">
+          ${family.notes ? `<div style="margin-top:8px;font-size:13px;color:#495057;background:#f8f9fa;border:1px dashed #dee2e6;border-radius:6px;padding:8px">${family.notes}</div>` : ''}
+        </li>
       `;
+        }).join('')}
+    </ul>
+  </div>
+`;
+    }
 
-                                    var list;
-                                    if (!families.length) {
-                                        list = `
-          <div style="background:#fff3cd;border:1px solid #ffeeba;color:#856404;border-radius:6px;padding:10px 12px;margin:8px 0">
-            No families found for this building.
-          </div>
-        `;
-                                    } else {
-                                        list = `
-          <div>
-            <h4 style="margin:0 0 8px">Families</h4>
-            <ul style="list-style:none;padding:0;margin:0">
-              ${families.map(function (family) {
-                                            var members = (family.count_family_members != null) ? family.count_family_members : '—';
-                                            var houseType = family.house_type ? `<span style="display:inline-block;background:#eef7ff;border:1px solid #d2e7ff;border-radius:12px;padding:2px 8px;margin-left:6px;font-size:12px">${family.house_type}</span>` : '';
-                                            return `
-                  <li style="border:1px solid #e9ecef;border-radius:10px;padding:10px 12px;margin-bottom:10px">
-                    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-                      <div style="min-width:0">
-                        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                          ${family.family_name || 'Unnamed Family'} ${houseType}
-                        </div>
-                        <div style="font-size:13px;color:#555;margin-top:3px">
-                          <span style="margin-right:10px"><strong>Members:</strong> ${members}</span>
-                          ${family.family_code ? `<span style="margin-right:10px"><strong>Code:</strong> ${family.family_code}</span>` : ''}
-                          ${family.floor_number != null ? `<span style="margin-right:10px"><strong>Floor:</strong> ${family.floor_number}</span>` : ''}
-                        </div>
-                        ${family.address ? `<div style="font-size:13px;color:#666;margin-top:3px">${family.address}</div>` : ''}
-                      </div>
-                      <div style="display:flex;gap:6px;flex-shrink:0">
-                        <button type="button" class="btn btn-light" data-action="edit-family" data-family-id="${family.id}" style="padding:6px 10px;border:1px solid #ced4da;border-radius:6px">Edit</button>
-                        <button type="button" class="btn btn-danger" data-action="delete-family" data-family-id="${family.id}" style="padding:6px 10px;border-radius:6px">Delete</button>
-                      </div>
-                    </div>
-                    ${family.notes ? `<div style="margin-top:8px;font-size:13px;color:#495057;background:#f8f9fa;border:1px dashed #dee2e6;border-radius:6px;padding:8px">${family.notes}</div>` : ''}
-                  </li>
-                `;
-                                        }).join('')}
-            </ul>
-          </div>
-        `;
-                                    }
+    self.modalContent.innerHTML = header + list;
+}
 
-                                    self.modalContent.innerHTML = header + list;
-                                }
 
                                 render(); // initial render
 
@@ -552,6 +562,16 @@
 
                                     if (action === 'edit-building') {
                                         window.location.href = CONFIG.BUILDING_EDIT_URL(building.id);
+                                    }
+
+                                    if (action === 'edit-family') {
+                                        var fid = btn.getAttribute('data-family-id');
+                                        if (fid) window.location.href = CONFIG.FAMILY_EDIT_URL(fid);
+                                    }
+
+                                    if (action === 'add-family') {
+                                        var bid = btn.getAttribute('data-building-id');
+                                        if (bid) window.location.href = CONFIG.FAMILY_ADD_URL(bid);
                                     }
 
                                     if (action === 'edit-family') {
