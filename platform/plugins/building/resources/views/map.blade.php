@@ -91,17 +91,18 @@
 
                 ];
             })->values()->toJson(JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!};
-    window.ROUTES = {
-        areas: "{{ route('building.areas.index') }}",
-        create: "{{ route('building.create.from.map') }}",
-        residentsBase: "{{ url('/building-info') }}", // used as /building/{id}/residents
+            window.ROUTES = {
+                areas: "{{ route('building.areas.index') }}",
+                create: "{{ route('building.create.from.map') }}",
+                residentsBase: "{{ url('/building-info') }}", // used as /building/{id}/residents
 
-        // Admin bases (adjust if your admin prefix is different)
-        buildingEditBase: "{{ url('/admin/buildings') }}", // /{id}/edit
-        familyEditBase: "{{ url('/admin/families') }}",   // /{id}/edit
-        familyDeleteBase: "{{ url('/admin/families') }}", // /{id} with DELETE
-    };
+                // Admin bases (adjust if your admin prefix is different)
+                buildingEditBase: "{{ url('/admin/buildings') }}", // /{id}/edit
+                familyEditBase: "{{ url('/admin/families') }}",   // /{id}/edit
+                familyDeleteBase: "{{ url('/admin/families') }}", // /{id} with DELETE
+            };
 </script>
+
 {{-- Optionally pass buildings to JS to avoid an extra request --}}
 @if(!empty($buildings))
     <script>
