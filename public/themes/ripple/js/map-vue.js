@@ -15,7 +15,7 @@
 (function () {
     // ---- CONFIG (adjust endpoints if your routes differ) ----
     var CONFIG = {
-        MAP_CENTER: { lat: 33.475760, lng: 36.317152 },
+        MAP_CENTER: { lat: 33.481289, lng: 36.311463 },
         MAP_ZOOM: 17,
         MAP_TYPE_ID: 'satellite',
 
@@ -215,7 +215,7 @@
                     position: 'absolute',
                     top: '12px',
                     right: '12px',
-                    zIndex: 10001,
+                    zIndex: 9999,
                     background: '#0d6efd',
                     color: '#fff',
                     border: 'none',
@@ -478,14 +478,14 @@
                     // click => open residents modal
                     circle.addListener('click', function () {
                         if (!self.modalOverlay || !self.modalContent) return;
-                        self.modalContent.innerHTML = '<p>Loading residents for <strong>' + (b.name || ('#' + b.id)) + '</strong>...</p>';
+                        self.modalContent.innerHTML = '<p>جاري تحميل السكان <strong>' + (b.name || ('#' + b.id)) + '</strong>...</p>';
                         self.modalOverlay.style.display = 'flex';
 
                         fetch(CONFIG.RESIDENTS_GET_URL(b.id), { headers: { 'Accept': 'application/json' } })
                             .then(jsonSafe)
                             .then(function (resp) {
                                 if (resp.error) {
-                                    self.modalContent.innerHTML = '<p>Failed to load building info.</p>';
+                                    self.modalContent.innerHTML = '<p>خطأ في تحميل معلومات البناء.</p>';
                                     return;
                                 }
 
@@ -495,7 +495,7 @@
                                 // Local renderer so we can re-render after deletes
 function render() {
     var header = `
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+<div class="build-header" style="">
   <div>
     <h3 style="margin:0">${building.name || ('#' + building.id)}</h3>
     <div style="margin-top:6px;font-size:13px;color:#555">
@@ -537,7 +537,7 @@ function render() {
             var houseType = family.house_type ? `<span style="display:inline-block;background:#eef7ff;border:1px solid #d2e7ff;border-radius:12px;padding:2px 8px;margin-left:6px;font-size:12px">${family.house_type}</span>` : '';
             return `
         <li style="border:1px solid #e9ecef;border-radius:10px;padding:10px 12px;margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <div class="family-style">
             <div style="min-width:0">
               <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                 ${family.family_name || 'عائلة بدون اسم'} ${houseType}
@@ -554,7 +554,7 @@ function render() {
               <button type="button" class="btn btn-danger" data-action="delete-family" data-family-id="${family.id}" style="padding:6px 10px;border-radius:6px">حذف</button>
             </div>
           </div>
-          ${family.notes ? `<div style="margin-top:8px;font-size:13px;color:#495057;background:#f8f9fa;border:1px dashed #dee2e6;border-radius:6px;padding:8px">${family.notes}</div>` : ''}
+          ${family.notes ? `<div style="margin-right:5px;font-size:13px;color:#495057;background:#f8f9fa;border:1px dashed #dee2e6;border-radius:6px;padding:8px">${family.notes}</div>` : ''}
         </li>
       `;
         }).join('')}
@@ -647,7 +647,7 @@ function render() {
                                     if (action === 'delete-family') {
                                         var fid = btn.getAttribute('data-family-id');
                                         if (!fid) return;
-                                        if (!confirm('Delete this family? This action cannot be undone.')) return;
+                                        if (!confirm('هل تريد حذف معلومات العائلة, هذا الامر لا يمكن التراجع عنه!!')) return;
 
                                         var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || null;
                                         var headers = { 'Accept': 'application/json' };
@@ -681,7 +681,7 @@ function render() {
                             })
                             .catch(function (err) {
                                 console.error('building info fetch error:', err);
-                                self.modalContent.innerHTML = '<p>Failed to load building info.</p>';
+                                self.modalContent.innerHTML = '<p>خطأ في تحميل معلومات البناء.</p>';
                             });
 
                     });
