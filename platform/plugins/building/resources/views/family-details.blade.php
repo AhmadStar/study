@@ -82,8 +82,15 @@
         </div>
 
         <div class="col-md-6 mb-3">
-            <label class="form-label">معرف البناء</label>
-            <input type="text" name="building_id" value="{{ old('building_id', $family->building_id) }}" class="form-control">
+            <label class="form-label">البناء</label>
+            <select name="building_id" class="form-control">
+                @foreach(\Botble\Building\Models\Building::orderBy('name')->get() as $building)
+                    <option value="{{ $building->id }}"
+                            {{ old('building_id', request('id')) == $building->id ? 'selected' : '' }}>
+                        {{ $building->name }}
+                    </option>
+                @endforeach
+            </select>
         </div>
     </div>
 

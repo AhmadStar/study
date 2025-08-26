@@ -15,7 +15,7 @@
 (function () {
     // ---- CONFIG (adjust endpoints if your routes differ) ----
     var CONFIG = {
-        MAP_CENTER: { lat: 33.475760, lng: 36.317152 },
+        MAP_CENTER: { lat: 33.481289, lng: 36.311463 },
         MAP_ZOOM: 17,
         MAP_TYPE_ID: 'satellite',
 

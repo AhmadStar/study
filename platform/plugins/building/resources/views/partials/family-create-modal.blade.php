@@ -2,7 +2,7 @@
 <div v-if="openFamilyCreateModal==1" id="familyCreateModalOverlay"
     style="
 background: rgb(255, 255, 255);width: 90%;max-width: 720px;max-height: 85vh;
-overflow: auto;border-radius: 10px;left: 50%;top: 10%;
+overflow: auto;border-radius: 10px;left: 20%;top: 10%;
 position: relative;padding: 18px;box-shadow: rgba(0, 0, 0, 0.25) 0px 8px 24px;">
     <div id="familyCreateModal"
         style="background: rgb(255, 255, 255);
@@ -16,12 +16,12 @@ position: relative;padding: 18px;box-shadow: rgba(0, 0, 0, 0.25) 0px 8px 24px;">
     box-shadow: rgba(0, 0, 0, 0.25) 0px 8px 24px;
     position: fixed;
     /* top: 10px; */
-    left: 50%;
+    left: 20%;
     top: 30px;
     z-index: 9999999999999;
     transform: translate(-50%);">
-        <span id="familyCreateModalClose"
-            style="position:absolute;top:10px;right:14px;font-size:28px;color:#888;cursor:pointer;user-select:none">×</span>
+        <span id="familyCreateModalClose" @click='closeModel()'
+            style="position:absolute;top:5px;left:15px;font-size:28px;color:#888;cursor:pointer;user-select:none">×</span>
 
         <h3 style="margin:0 0 12px">إضافة عائلة</h3>
         <div id="familyCreateAlert" style="display:none;margin-bottom:10px"></div>
