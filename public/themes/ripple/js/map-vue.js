@@ -15,7 +15,7 @@
 (function () {
     // ---- CONFIG (adjust endpoints if your routes differ) ----
     var CONFIG = {
-        MAP_CENTER: { lat: 33.4750 + 0.0066, lng: 36.3090 },
+        MAP_CENTER: { lat: 33.475760, lng: 36.317152 },
         MAP_ZOOM: 17,
         MAP_TYPE_ID: 'satellite',
 
@@ -53,7 +53,16 @@
         },
     };
 
-
+    var familyCloseBtn = document.getElementById('familyCreateModalClose');
+    if (familyCloseBtn) {
+        familyCloseBtn.addEventListener('click', function () {
+            if (adminApp) {
+                adminApp.openFamilyCreateModal = 0;   // يخفي المودال (لو مستخدم v-if / v-show في Vue)
+            }
+            var overlay = document.getElementById('familyCreateModalOverlay');
+            if (overlay) overlay.style.display = 'none'; // إغلاق الواجهة تماماً
+        });
+    }
 
 
     // ---- UTIL ----
@@ -125,6 +134,20 @@
 
         mounted: function () {
             var self = this;
+            // self.$nextTick(function() {
+            //     var familyCloseBtn = document.getElementById('familyCreateModalClose');
+            //     if (familyCloseBtn) {
+            //         familyCloseBtn.addEventListener('click', function () {
+            //             self.openFamilyCreateModal = 0;
+            //             var overlay = document.getElementById('familyCreateModalOverlay');
+            //             if (overlay) overlay.style.display = 'none';
+            //             var content = document.getElementById('familyCreateModalContent');
+            //             if (content) content.innerHTML = '';
+            //         });
+            //     }
+            // });
+
+
 
             // Prepare residents modal hooks (from existing Blade)
             self.modalOverlay = qs('#residentsModalOverlay');
@@ -166,6 +189,18 @@
 
         methods: {
             // ---------- UI INJECTION ----------
+            closeModel:function () {
+                var familyCloseBtn = document.getElementById('familyCreateModalClose');
+                if (familyCloseBtn) {
+                    familyCloseBtn.addEventListener('click', function () {
+                        self.openFamilyCreateModal = 0;
+                        var overlay = document.getElementById('familyCreateModalOverlay');
+                        if (overlay) overlay.style.display = 'none';
+                        var content = document.getElementById('familyCreateModalContent');
+                        if (content) content.innerHTML = '';
+                    });
+                }
+            },
             injectCreateButton: function () {
                 var self = this;
                 // Add a simple top-right button overlay on the map container
@@ -180,7 +215,7 @@
                     position: 'absolute',
                     top: '12px',
                     right: '12px',
-                    zIndex: 10001,
+                    zIndex: 9999,
                     background: '#0d6efd',
                     color: '#fff',
                     border: 'none',
@@ -443,14 +478,14 @@
                     // click => open residents modal
                     circle.addListener('click', function () {
                         if (!self.modalOverlay || !self.modalContent) return;
-                        self.modalContent.innerHTML = '<p>Loading residents for <strong>' + (b.name || ('#' + b.id)) + '</strong>...</p>';
+                        self.modalContent.innerHTML = '<p>جاري تحميل السكان <strong>' + (b.name || ('#' + b.id)) + '</strong>...</p>';
                         self.modalOverlay.style.display = 'flex';
 
                         fetch(CONFIG.RESIDENTS_GET_URL(b.id), { headers: { 'Accept': 'application/json' } })
                             .then(jsonSafe)
                             .then(function (resp) {
                                 if (resp.error) {
-                                    self.modalContent.innerHTML = '<p>Failed to load building info.</p>';
+                                    self.modalContent.innerHTML = '<p>خطأ في تحميل معلومات البناء.</p>';
                                     return;
                                 }
 
@@ -460,7 +495,7 @@
                                 // Local renderer so we can re-render after deletes
 function render() {
     var header = `
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+<div class="build-header" style="">
   <div>
     <h3 style="margin:0">${building.name || ('#' + building.id)}</h3>
     <div style="margin-top:6px;font-size:13px;color:#555">
@@ -502,7 +537,7 @@ function render() {
             var houseType = family.house_type ? `<span style="display:inline-block;background:#eef7ff;border:1px solid #d2e7ff;border-radius:12px;padding:2px 8px;margin-left:6px;font-size:12px">${family.house_type}</span>` : '';
             return `
         <li style="border:1px solid #e9ecef;border-radius:10px;padding:10px 12px;margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <div class="family-style">
             <div style="min-width:0">
               <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                 ${family.family_name || 'عائلة بدون اسم'} ${houseType}
@@ -519,7 +554,7 @@ function render() {
               <button type="button" class="btn btn-danger" data-action="delete-family" data-family-id="${family.id}" style="padding:6px 10px;border-radius:6px">حذف</button>
             </div>
           </div>
-          ${family.notes ? `<div style="margin-top:8px;font-size:13px;color:#495057;background:#f8f9fa;border:1px dashed #dee2e6;border-radius:6px;padding:8px">${family.notes}</div>` : ''}
+          ${family.notes ? `<div style="margin-right:5px;font-size:13px;color:#495057;background:#f8f9fa;border:1px dashed #dee2e6;border-radius:6px;padding:8px">${family.notes}</div>` : ''}
         </li>
       `;
         }).join('')}
@@ -542,23 +577,34 @@ function render() {
                                     var action = btn.getAttribute('data-action');
 
                                     if (action === 'add-family') {
-                                        if (window.openFamilyCreateModal) {
-                                            window.openFamilyCreateModal(building.id, building.name);
-                                            // Optional: when a family is created elsewhere, refresh this list
-                                            document.addEventListener('family:created', function () {
-                                                // re-fetch fresh data
-                                                fetch(CONFIG.RESIDENTS_GET_URL(building.id), { headers: { 'Accept': 'application/json' } })
-                                                    .then(jsonSafe)
-                                                    .then(function (r) {
-                                                        if (!r.error) {
-                                                            building = r.data || building;
-                                                            families = Array.isArray(building.families) ? building.families : [];
-                                                            render();
-                                                        }
-                                                    });
-                                            }, { once: true });
+                                        var bid = btn.getAttribute('data-building-id');
+                                        if (bid) {
+                                            self.openFamilyCreateModal = 1;
+
+                                            // ابحث عن البناء داخل this.buildings
+                                            self.buildingCreated = (self.buildings || []).find(function (b) {
+                                                return String(b.id) === String(bid);
+                                            });
+
+                                            console.log('building created:', self.buildingCreated);
+
+                                            // 🔴 إخفاء نافذة السكان
+                                            if (self.modalOverlay) {
+                                                self.modalOverlay.style.display = 'none';
+                                                self.modalContent.innerHTML = '';
+                                            }
                                         }
+
+                                        // Reset + close
+                                        setTimeout(function () {
+                                            self.closeCreateModal();
+                                            self.clearCreateAlert();
+                                        }, 800);
+
+                                        self.resetFormKeepCoords();
+                                        // if (bid) window.location.href = CONFIG.FAMILY_ADD_URL(bid);
                                     }
+
 
                                     if (action === 'edit-building') {
                                         window.location.href = CONFIG.BUILDING_EDIT_URL(building.id);
@@ -571,8 +617,27 @@ function render() {
 
                                     if (action === 'add-family') {
                                         var bid = btn.getAttribute('data-building-id');
-                                        if (bid) window.location.href = CONFIG.FAMILY_ADD_URL(bid);
+                                        if (bid) {
+                                            self.openFamilyCreateModal = 1;
+
+                                            // ابحث عن البناء داخل this.buildings
+                                            self.buildingCreated = (self.buildings || []).find(function (b) {
+                                                return String(b.id) === String(bid);
+                                            });
+
+                                            console.log('building created:', self.buildingCreated);
+                                        }
+
+                                        // Reset + close
+                                        setTimeout(function () {
+                                            self.closeCreateModal();
+                                            self.clearCreateAlert();
+                                        }, 800);
+
+                                        self.resetFormKeepCoords();
+                                        // if (bid) window.location.href = CONFIG.FAMILY_ADD_URL(bid);
                                     }
+
 
                                     if (action === 'edit-family') {
                                         var fid = btn.getAttribute('data-family-id');
@@ -582,7 +647,7 @@ function render() {
                                     if (action === 'delete-family') {
                                         var fid = btn.getAttribute('data-family-id');
                                         if (!fid) return;
-                                        if (!confirm('Delete this family? This action cannot be undone.')) return;
+                                        if (!confirm('هل تريد حذف معلومات العائلة, هذا الامر لا يمكن التراجع عنه!!')) return;
 
                                         var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || null;
                                         var headers = { 'Accept': 'application/json' };
@@ -616,7 +681,7 @@ function render() {
                             })
                             .catch(function (err) {
                                 console.error('building info fetch error:', err);
-                                self.modalContent.innerHTML = '<p>Failed to load building info.</p>';
+                                self.modalContent.innerHTML = '<p>خطأ في تحميل معلومات البناء.</p>';
                             });
 
                     });
@@ -641,6 +706,21 @@ function render() {
                 }
             },
 
+
+            addFamily:function (building) {
+                if (created.id) {
+                    self.openFamilyCreateModal = 1;
+                    self.buildingCreated = building;
+                    console.error('create error:', self.buildingCreated);
+                }
+                // Reset + close
+                setTimeout(function () {
+                    self.closeCreateModal();
+                    self.clearCreateAlert();
+                }, 800);
+
+                self.resetFormKeepCoords();
+            },
             // ---------- SAVE ----------
             saveBuilding: function () {
                 var self = this;

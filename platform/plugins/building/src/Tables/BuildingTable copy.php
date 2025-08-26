@@ -30,6 +30,11 @@ class BuildingTable extends TableAbstract
             ])
             ->addColumns([
                 IdColumn::make(),
+                Column::make('building_number')->title('رقم المبنى')->linkToEdit(),
+                Column::make('area_id')->title('المنطقة'),
+                Column::make('floors_count')->title('عدد الطوابق'),
+                Column::make('latitude')->title('خط العرض'),
+                Column::make('longitude')->title('خط الطول'),
                 StatusColumn::make(),
                 CreatedAtColumn::make(),
             ])
@@ -42,7 +47,7 @@ class BuildingTable extends TableAbstract
                 CreatedAtBulkChange::make(),
             ])
             ->queryUsing(function (Builder $query) {
-                $query->select(['id', 'building_number', 'floors_count', 'status', 'created_at']);
+                $query->select(['id','area_id','building_number','floors_count','latitude','longitude','status','created_at']);
             });
     }
 }
