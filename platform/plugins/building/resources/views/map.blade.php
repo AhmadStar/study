@@ -38,7 +38,7 @@
         /* Close button */
         #residentsModalClose {
             position: absolute;
-            top: 10px; right: 15px;
+            top: 5px; left: 15px;
             font-size: 28px; color: #888;
             cursor: pointer; user-select: none;
         }

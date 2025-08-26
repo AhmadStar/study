@@ -49,9 +49,17 @@ class FamilyForm extends FormAbstract
             ->add('count_family_members', \Botble\Base\Forms\Fields\TextField::class, TextFieldOption::make()
                 ->label('عدد أفراد العائلة'))
 
-            ->add('building_id', \Botble\Base\Forms\Fields\TextField::class, TextFieldOption::make()
-                ->label('معرف البناء'))
-
+            ->add('building_id', \Botble\Base\Forms\Fields\SelectField::class, SelectFieldOption::make()
+                ->label('البناء .')
+                ->choices(
+                    Building::query()
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
+                ->searchable()   // optional: enables select2 search
+                ->required()
+            )
             ->add('house_type', \Botble\Base\Forms\Fields\SelectField::class, SelectFieldOption::make()
                 ->label('نوع ملكية العقار')
                 ->choices([
