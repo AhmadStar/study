@@ -108,35 +108,49 @@ public function registerFamily(RegisterFamilyRequest $request)
 
         return FamilyForm::create()->renderForm();
     }
+
+
     public function storeF(Request $request)
     {
         $data = $request->all();
 
         $validated = validator($data, [
-            'family_name' => 'required|string|max:255',
-            'family_number' => 'nullable|string|max:255',
-            'floor_number' => 'nullable|integer|min:0',
-            'family_code' => 'nullable|in:A,B,C,D,E',
-            'phone' => 'nullable|string|max:50',
-            'count_family_members' => 'nullable|integer|min:0',
-            'house_type' => 'nullable|string|max:50',
-            'status' => 'nullable|string|max:60',
-            'address' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-            'building_id' => 'required|exists:buildings,id',
-            
+            'name'                 => ['nullable', 'string', 'max:255'],
+            'family_name'          => ['required', 'string', 'max:255'],
+            'family_number'        => ['nullable', 'string', 'max:255'],
+            'floor_number'         => ['nullable', 'integer', 'min:0'],
+            'family_code'          => ['nullable', 'in:A,B,C,D,E'],
+            'phone'                => ['nullable', 'string', 'max:50'],
+            'count_family_members' => ['nullable', 'integer', 'min:0'],
+            'house_type'           => ['nullable', 'in:ملك,ايجار,غير ذلك'],
+            'status'               => ['required', 'in:published,draft,pending'],
+            'address'              => ['nullable', 'string', 'max:255'],
+            'notes'                => ['nullable', 'string'],
+            'building_id'          => ['required', 'exists:buildings,id'],
+
+            'is_featured_person'   => ['sometimes', 'boolean'],
+            'featured_person'      => ['nullable', 'string', 'max:255', 'required_if:is_featured_person,1'],
         ])->validate();
 
-        $family = \Botble\Family\Models\Family::create($validated);
-        $buildings = Building::with('persons')->get();
-       // dd($data,$validated,$family);
-        return view('plugins/building::map', ['buildings' => $buildings])->render();
-//        return response()->json([
-//            'error' => false,
-//            'message' => 'Family created successfully.',
-//            'result' => ['data' => $family]
-//        ]);
+        $validated['is_featured_person'] = $request->boolean('is_featured_person');
+
+        if (!$validated['is_featured_person']) {
+            $validated['featured_person'] = null;
+        }
+
+        $family = Family::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'error'  => false,
+                'message'=> 'Family created successfully.',
+                'result' => ['data' => $family],
+            ]);
+        }
+
+        return redirect()->back()->with('status', 'تم إنشاء العائلة بنجاح');
     }
+
     public function store(FamilyRequest $request)
     {
         $form = FamilyForm::create()->setRequest($request);

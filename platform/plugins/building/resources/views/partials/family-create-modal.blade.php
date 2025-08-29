@@ -33,10 +33,11 @@
             <input type="hidden" id="fam_building_id" name="building_id" :value="buildingCreated.id">
             {{-- If you want to tie family to an apartment later, you can add a dynamic select via JS --}}
 
+            
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                 <div>
                     <label>الاسم </label>
-                    <input type="text" class="form-control" name="family_name" id="fam_family_name" required>
+                    <input type="text" class="form-control" name="name" id="fam_name" required>
                 </div>
                 <div>
                     <label>اسم العائلة</label>
