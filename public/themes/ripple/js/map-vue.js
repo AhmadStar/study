@@ -272,7 +272,7 @@
                 close.textContent = '×';
                 Object.assign(close.style, {
                     position: 'absolute',
-                    top: '10px', right: '15px',
+                    top: '10px', left: '15px',
                     fontSize: '28px', color: '#888',
                     cursor: 'pointer', userSelect: 'none'
                 });
