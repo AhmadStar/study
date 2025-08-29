@@ -3,8 +3,46 @@
 @section('content')
     {{-- CSRF for AJAX --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
+
+        #fam_is_featured_person{
+            margin-right: -15px;
+        }
+        /* ======= Filters pills (awesome style) ======= */
+        .filters-bar {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            margin: 10px 0 14px; align-items: center;
+        }
+        .pill-filter { position: relative; }
+        .pill-filter input[type="checkbox"] {
+            position: absolute; opacity: 0; pointer-events: none;
+        }
+        .pill-filter label {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 12px; border-radius: 999px;
+            border: 1px solid #d0d7de; cursor: pointer; user-select: none;
+            background: #fff; font-weight: 600; font-size: 13px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04);
+            transition: all .18s ease-in-out;
+        }
+        .pill-filter label i { font-size: 16px; }
+        .pill-filter input:checked + label {
+            background: linear-gradient(180deg,#f0f7ff,#e2f0ff);
+            border-color: #9ed0ff; box-shadow: 0 2px 6px rgba(30,144,255,.18);
+        }
+        .pill-filter input:focus + label { outline: 2px solid #9ed0ff55; }
+        .pill-filter label .count { font-weight: 700; opacity: .6; }
+        .filters-actions {
+            margin-inline-start: auto; display: flex; gap: 8px;
+        }
+        .filters-actions button {
+            border: 1px solid #ced4da; background: #fff; border-radius: 8px;
+            padding: 6px 10px; cursor: pointer; font-size: 13px;
+        }
+        .filters-actions button:hover { background: #f8f9fa; }
+
         /* Residents Modal overlay */
         #residentsModalContent p {
             margin-bottom: 5px;
@@ -109,6 +147,8 @@
     </style>
 
     <div id="mapBuilding">
+        <div id="filtersBar" class="filters-bar" dir="rtl"></div>
+
         {{-- Map container (button injected by JS) --}}
         <div id="map" style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden;"></div>
 

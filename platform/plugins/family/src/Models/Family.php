@@ -13,6 +13,7 @@ class Family extends BaseModel
     protected $table = 'families';
 
     protected $fillable = [
+        'name',
         'family_name',
         'family_number',
         'floor_number',
@@ -25,6 +26,8 @@ class Family extends BaseModel
         'status',
         'count_family_members',
         'building_id',
+        'is_featured_person',
+        'featured_person',
         'house_type', // نوع ملكية العقار: ملك، ايجار، غير ذلك
     ];
 

@@ -32,6 +32,7 @@ class BuildingController extends BaseController
             'longitude'       => 'required|numeric',
             'address'         => 'nullable|string|max:500',
             'description'     => 'nullable|string',
+            'building_type' => 'nullable|string',
             'area_id'         => 'required|exists:areas,id', // adjust table name if prefixed
             'building_number' => 'nullable|string|max:50',
             'floors_count'    => 'nullable|integer|min:0',

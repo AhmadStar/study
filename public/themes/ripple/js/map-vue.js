@@ -89,6 +89,26 @@
         data: {
             // map + data
             map: null,
+            buildingTypes: (window.BUILDING_TYPES || [
+                { value: 'residential',    label: 'بناء سكني' },
+                { value: 'commercial',     label: 'بناء تجاري' },
+                { value: 'security_point', label: 'نقطة أمنية' },
+                { value: 'usable_hq',      label: 'مقر يمكن الاستفادة منه' },
+                { value: 'slaughter_site', label: 'موقع مجزرة' },
+                { value: 'security_event', label: 'موقع حدث أمني' },
+                { value: 'military_point', label: 'نقطة عسكرية' },
+            ]),
+            activeTypes: [], // سنملؤها بكل الأنواع افتراضيًا
+            typeColors: {
+                security_point: '#00bcd4',
+                residential:    '#28a745',
+                commercial:     '#0d6efd',
+                usable_hq:      '#ffc107',
+                slaughter_site: '#dc3545',
+                security_event: '#6c757d',
+                military_point: '#6610f2',
+                other:          '#7a7a7a',
+            },
             openFamilyCreateModal: 0,
             buildingCreated: null,
             circles: [],
@@ -174,6 +194,7 @@
 
             // Inject Create modal (overlay)
             self.injectCreateModal();
+            self.injectTypeFilters();
 
             // Init map
             self.initMap();
@@ -188,6 +209,131 @@
         },
 
         methods: {
+            iconForType: function (val) {
+                // خريطة النوع → اسم الأيقونة (Tabler Icons)
+                const iconMap = {
+                    security_point: 'shield',
+                    residential: 'home',
+                    commercial: 'building-store',
+                    usable_hq: 'building-community',
+                    slaughter_site: 'alert-triangle',
+                    security_event: 'bell',
+                    military_point: 'target',
+                };
+
+                const name = iconMap[val] || 'building';
+                // ملاحظة: تعتمد على وجود CSS لأيقونات Tabler (ti ti-*)
+                return `<i class="ti ti-${name}" style="margin-inline-end:6px; font-size:16px; vertical-align:-2px;"></i>`;
+            },
+
+            // labelForType: function (val) {
+            //     const list =
+            //         Array.isArray(this.buildingTypes) ? this.buildingTypes :
+            //             (Array.isArray(window.BUILDING_TYPES) ? window.BUILDING_TYPES : []);
+            //     const t = list.find(x => x.value === val);
+            //     return t ? t.label : (val || '—');
+            // },
+            labelForType: function (val) {
+                const list = Array.isArray(this.buildingTypes) ? this.buildingTypes :
+                    (Array.isArray(window.BUILDING_TYPES) ? window.BUILDING_TYPES : []);
+                const t = list.find(x => x.value === val);
+                return t ? t.label : (val || 'أخرى');
+            },
+            // iconForType: function (val) {
+            //     const iconMap = {
+            //         security_point: 'shield',
+            //         residential: 'home',
+            //         commercial: 'building-store',
+            //         usable_hq: 'building-community',
+            //         slaughter_site: 'alert-triangle',
+            //         security_event: 'bell',
+            //         military_point: 'target',
+            //     };
+            //     const name = iconMap[val] || 'building';
+            //     return `<i class="ti ti-${name}"></i>`;
+            // },
+            colorByType: function (val) {
+                return this.typeColors[val] || this.typeColors.other;
+            },
+
+            injectTypeFilters: function () {
+                const host = document.getElementById('filtersBar');
+                if (!host) return;
+                const self = this;
+
+                // افتراضيًا: فعل كل الأنواع
+                if (!Array.isArray(this.activeTypes) || !this.activeTypes.length) {
+                    this.activeTypes = this.buildingTypes.map(t => t.value);
+                }
+
+                // إبني عناصر الفلاتر
+                host.innerHTML = `
+    <div class="filters-group" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      ${this.buildingTypes.map(t => {
+                    const id = `flt_${t.value}`;
+                    const checked = self.activeTypes.includes(t.value) ? 'checked' : '';
+                    return `
+          <div class="pill-filter">
+            <input type="checkbox" id="${id}" value="${t.value}" ${checked}>
+            <label for="${id}">
+              ${self.iconForType(t.value)}
+              <span>${t.label}</span>
+            </label>
+          </div>
+        `;
+                    }).join('')}
+      <div class="filters-actions">
+        <button type="button" data-action="select-all">تحديد الكل</button>
+        <button type="button" data-action="clear-all">مسح</button>
+      </div>
+    </div>
+  `;
+
+                // ربط الأحداث (تغيير الاختيارات)
+                host.addEventListener('change', function (e) {
+                    const cb = e.target.closest('input[type="checkbox"]');
+                    if (!cb) return;
+                    const val = cb.value;
+                    if (cb.checked) {
+                        if (!self.activeTypes.includes(val)) self.activeTypes.push(val);
+                    } else {
+                        self.activeTypes = self.activeTypes.filter(x => x !== val);
+                    }
+                    self.updateCircleVisibility();
+                });
+
+                // أزرار "الكل/مسح"
+                host.addEventListener('click', function (e) {
+                    const btn = e.target.closest('[data-action]');
+                    if (!btn) return;
+                    const act = btn.getAttribute('data-action');
+                    if (act === 'select-all') {
+                        self.activeTypes = self.buildingTypes.map(t => t.value);
+                        host.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                        self.updateCircleVisibility();
+                    }
+                    if (act === 'clear-all') {
+                        self.activeTypes = [];
+                        host.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                        self.updateCircleVisibility();
+                    }
+                });
+            },
+
+            updateCircleVisibility: function () {
+                // أخف/أظهر الدوائر حسب الأنواع النشطة
+                const act = new Set(this.activeTypes);
+                this.circles.forEach(({building, circle}) => {
+                    const t = building.building_type || 'other';
+                const visible = act.size === 0 ? false : act.has(t);
+                if (circle.setVisible) {
+                    circle.setVisible(visible);
+                } else {
+                    // بديل إن لم تتوفر setVisible
+                    circle.setMap(visible ? this.map : null);
+                }
+            });
+            },
             // ---------- UI INJECTION ----------
             closeModel:function () {
                 var familyCloseBtn = document.getElementById('familyCreateModalClose');
@@ -213,7 +359,7 @@
                 btn.textContent = 'إضافة بناء جديد';
                 Object.assign(btn.style, {
                     position: 'absolute',
-                    top: '12px',
+                    top: '60px',
                     right: '12px',
                     zIndex: 9999,
                     background: '#0d6efd',
@@ -325,6 +471,13 @@
         <label>العنوان</label>
         <input id="f_address" type="text" class="form-control" style="width:100%">
       </div>
+       <div>
+                  <label>نوع البناء</label>
+                  <select id="f_building_type" class="form-select" style="width:100%" required>
+                    <option value="">اختر النوع…</option>
+                  </select>
+                </div>
+
       <div>
         <label>رقم المبنى</label>
         <input id="f_building_number" type="text" class="form-control" style="width:100%">
@@ -361,6 +514,13 @@
                     this.areas.map(function (a) {
                         return '<option value="' + a.id + '">' + (a.name || ('#' + a.id)) + '</option>';
                     }).join('');
+
+                // Populate building types (بالعربي)
+                var selType = qs('#f_building_type', this.createContent);
+                selType.innerHTML = '<option value="">اختر النوع…</option>' +
+                    this.buildingTypes.map(function (t) {
+                        return '<option value="' + t.value + '">' + t.label + '</option>';
+                    }).join('');
             },
 
             openCreateModal: function () {
@@ -376,6 +536,7 @@
                     setVal('#f_address', F.address);
                     setVal('#f_description', F.description);
                     setVal('#f_building_number', F.building_number);
+                    setVal('#f_building_type', F.building_type);
                     setVal('#f_floors_count', F.floors_count);
                     var sel = qs('#f_area_id', m);
                     if (sel) sel.value = F.area_id || '';
@@ -494,11 +655,23 @@
 
                                 // Local renderer so we can re-render after deletes
 function render() {
+    const _building_type = building.building_type_label || self.labelForType(building.building_type);
+    const _type_icon = self.iconForType(building.building_type);
+
+    const typeBadge = building.building_type
+        ? `<span style="display:inline-block;background:#eaf4ff;border:1px solid #cfe4ff;border-radius:12px;padding:4px 8px;margin-left:6px" dir="rtl">
+       ${_type_icon}<strong></strong> ${_building_type}
+     </span>`
+        : '';
     var header = `
 <div class="build-header" style="">
   <div>
     <h3 style="margin:0">${building.name || ('#' + building.id)}</h3>
+     ${typeBadge}
+
     <div style="margin-top:6px;font-size:13px;color:#555">
+    
+           
       <span style="display:inline-block;background:#f1f3f5;border:1px solid #e9ecef;border-radius:12px;padding:4px 8px;margin-right:6px">
         <strong>رقم المبنى:</strong> ${building.building_number || '—'}
       </span>
@@ -735,8 +908,10 @@ function render() {
                 this.form.description = getVal('#f_description').trim();
                 this.form.area_id = getVal('#f_area_id').trim();
                 this.form.building_number = getVal('#f_building_number').trim();
+                this.form.building_type = getVal('#f_building_type').trim();
                 var fc = getVal('#f_floors_count').trim();
                 this.form.floors_count = fc ? Number(fc) : null;
+
 
                 // Basic checks
                 if (!this.form.name) return this.showCreateAlert('Please enter a name.', 'danger');

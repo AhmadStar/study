@@ -124,6 +124,7 @@ public function registerFamily(RegisterFamilyRequest $request)
             'address' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
             'building_id' => 'required|exists:buildings,id',
+            
         ])->validate();
 
         $family = \Botble\Family\Models\Family::create($validated);

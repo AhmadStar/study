@@ -35,9 +35,38 @@
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                 <div>
+                    <label>الاسم </label>
+                    <input type="text" class="form-control" name="family_name" id="fam_family_name" required>
+                </div>
+                <div>
                     <label>اسم العائلة</label>
                     <input type="text" class="form-control" name="family_name" id="fam_family_name" required>
                 </div>
+                {{-- شخصية اعتبارية؟ --}}
+                <div style="grid-column:1 / span 2">
+                    {{-- هيدن لإرسال 0 عند الإلغاء --}}
+                    <input type="hidden" name="is_featured_person" value="0">
+                    <label class="form-check form-switch" style="padding-right: 2.5rem;display:flex;align-items:center;gap:10px">
+                        <input class="form-check-input" type="checkbox"
+                               id="fam_is_featured_person" name="is_featured_person" value="1"
+                               onchange="
+                    var on=this.checked;
+                    var wrap=document.getElementById('featured_person_wrap');
+                    var inp=document.getElementById('fam_featured_person');
+                    if(wrap) wrap.style.display = on ? 'block' : 'none';
+                    if(inp){ inp.disabled = !on; if(!on) inp.value=''; }
+               ">
+                        <span style="
+    margin-right: 40px;
+">هل هو <strong>شخصية اعتبارية</strong>؟</span>
+                    </label>
+                </div>
+
+                <div id="featured_person_wrap" style="grid-column:1 / span 2; display:none">
+                    <label>اسم الشخصية الاعتبارية</label>
+                    <input type="text" class="form-control" name="featured_person" id="fam_featured_person" disabled>
+                </div>
+
                 <div>
                     <label>رقم العائلة</label>
                     <input type="text" class="form-control" name="family_number" id="fam_family_number">

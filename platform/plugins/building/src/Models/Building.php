@@ -21,6 +21,7 @@ class Building extends BaseModel
         'address',
         'description',
         'area_id',
+        'building_type',
         'building_number',
         'floors_count',
     ];

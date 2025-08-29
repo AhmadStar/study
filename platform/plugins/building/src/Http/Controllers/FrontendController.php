@@ -20,6 +20,8 @@ class FrontendController extends BaseController
     public function getResidents($id)
     {
         $building = Building::with('persons')->findOrFail($id);
+        $building->building_type= $building->getOriginal('building_type');//arabic translation
+        $building->building_type_label= $building->building_type_label;//arabic translation
         return response()->json($building->persons);
     }
 

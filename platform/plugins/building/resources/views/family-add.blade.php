@@ -10,6 +10,10 @@
 
     <div class="row">
         <div class="col-md-6 mb-3">
+            <label class="form-label">الاسم </label>
+            <input type="text" name="family_name" value="" class="form-control">
+        </div>
+        <div class="col-md-6 mb-3">
             <label class="form-label">اسم العائلة</label>
             <input type="text" name="family_name" value="" class="form-control">
         </div>
@@ -19,6 +23,28 @@
             <input type="text" name="family_number" value="" class="form-control">
         </div>
     </div>
+        {{-- شخصية اعتبارية؟ --}}
+        <div style="grid-column:1 / span 2">
+            {{-- هيدن لإرسال 0 عند الإلغاء --}}
+            <input type="hidden" name="is_featured_person" value="0">
+            <label class="form-check form-switch" style="display:flex;align-items:center;gap:10px">
+                <input class="form-check-input" type="checkbox"
+                       id="fam_is_featured_person" name="is_featured_person" value="1"
+                       onchange="
+                    var on=this.checked;
+                    var wrap=document.getElementById('featured_person_wrap');
+                    var inp=document.getElementById('fam_featured_person');
+                    if(wrap) wrap.style.display = on ? 'block' : 'none';
+                    if(inp){ inp.disabled = !on; if(!on) inp.value=''; }
+               ">
+                <span>هل هو <strong>شخصية اعتبارية</strong>؟</span>
+            </label>
+        </div>
+
+        <div id="featured_person_wrap" style="grid-column:1 / span 2; display:none">
+            <label>اسم الشخصية الاعتبارية</label>
+            <input type="text" class="form-control" name="featured_person" id="fam_featured_person" disabled>
+        </div>
 
     <div class="row">
         <div class="col-md-6 mb-3">
