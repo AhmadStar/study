@@ -109,60 +109,43 @@ public function registerFamily(RegisterFamilyRequest $request)
         return FamilyForm::create()->renderForm();
     }
 
-
-    public function storeF(Request $request)
-    {
-        $data = $request->all();
-
-        $validated = validator($data, [
-            'name'                 => ['nullable', 'string', 'max:255'],
-            'family_name'          => ['required', 'string', 'max:255'],
-            'family_number'        => ['nullable', 'string', 'max:255'],
-            'floor_number'         => ['nullable', 'integer', 'min:0'],
-            'family_code'          => ['nullable', 'in:A,B,C,D,E'],
-            'phone'                => ['nullable', 'string', 'max:50'],
-            'count_family_members' => ['nullable', 'integer', 'min:0'],
-            'house_type'           => ['nullable', 'in:ملك,ايجار,غير ذلك'],
-            'status'               => ['required', 'in:published,draft,pending'],
-            'address'              => ['nullable', 'string', 'max:255'],
-            'notes'                => ['nullable', 'string'],
-            'building_id'          => ['required', 'exists:buildings,id'],
-
-            'is_featured_person'   => ['sometimes', 'boolean'],
-            'featured_person'      => ['nullable', 'string', 'max:255', 'required_if:is_featured_person,1'],
-        ])->validate();
-
-        $validated['is_featured_person'] = $request->boolean('is_featured_person');
-
-        if (!$validated['is_featured_person']) {
-            $validated['featured_person'] = null;
-        }
-
-        $family = Family::create($validated);
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'error'  => false,
-                'message'=> 'Family created successfully.',
-                'result' => ['data' => $family],
-            ]);
-        }
-
-        return redirect()->back()->with('status', 'تم إنشاء العائلة بنجاح');
-    }
-
     public function store(FamilyRequest $request)
-    {
-        $form = FamilyForm::create()->setRequest($request);
+{
+    $form = FamilyForm::create()->setRequest($request);
 
-        $form->save();
+    // 1️⃣ خزن كل شيء بدون family_members
+    $data = $request->except('family_members');
 
-        return $this
-            ->httpResponse()
-            ->setPreviousUrl(route('family.index'))
-            ->setNextUrl(route('family.edit', $form->getModel()->getKey()))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+    // 2️⃣ حول أي حقل array إلى نص إذا كان هناك حاجة
+    if (isset($data['civil_registry']) && is_array($data['civil_registry'])) {
+        $data['civil_registry'] = implode(', ', $data['civil_registry']);
     }
+
+    // 3️⃣ احفظ العائلة
+    $family = $form->save($data);
+
+    // 4️⃣ خزن عناصر العائلة في جدول Person
+    $familyMembers = $request->input('family_members', []);
+    foreach ($familyMembers as $memberData) {
+        $memberAttributes = collect($memberData)->pluck('value', 'key')->toArray();
+
+        // تخطي إذا الاسم فارغ
+        if (empty($memberAttributes['full_name'])) {
+            continue;
+        }
+
+        $memberAttributes['family_id'] = $family->id;
+
+        unset($memberAttributes['image']); // إذا هناك حقل صورة غير مرغوب
+        Person::create($memberAttributes);
+    }
+
+    return $this
+        ->httpResponse()
+        ->setPreviousUrl(route('family.index'))
+        ->setNextUrl(route('family.edit', $form->getModel()->getKey()))
+        ->setMessage(trans('core/base::notices.create_success_message'));
+}
 
     public function edit(Family $family)
     {

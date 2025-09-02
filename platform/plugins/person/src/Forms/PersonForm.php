@@ -4,7 +4,6 @@ namespace Botble\Person\Forms;
 
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
-use Botble\Base\Forms\FieldOptions\DateFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\FormAbstract;
@@ -36,8 +35,6 @@ class PersonForm extends FormAbstract
                     'female' => 'أنثى',
                 ])
                 ->required())
-            ->add('date_of_birth', \Botble\Base\Forms\Fields\DateField::class, DateFieldOption::make()
-                ->label('تاريخ الميلاد'))
             ->add('relationship', \Botble\Base\Forms\Fields\TextField::class, TextFieldOption::make()
                 ->label('صلة القرابة'))
             ->add('occupation', \Botble\Base\Forms\Fields\TextField::class, TextFieldOption::make()

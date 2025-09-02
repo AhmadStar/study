@@ -56,6 +56,10 @@ class BuildingController extends BaseController
 
     public function store(BuildingRequest $request)
     {
+        $request->merge([
+            'building_number' => $request->input('name'),
+        ]);
+
         $form = BuildingForm::create()->setRequest($request);
 
         $form->save();

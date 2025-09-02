@@ -31,8 +31,6 @@ class AreaTable extends TableAbstract
             ->addColumns([
                 IdColumn::make(),
                 NameColumn::make()->route('area.edit'),
-                CreatedAtColumn::make(),
-                StatusColumn::make(),
             ])
             ->addBulkActions([
                 DeleteBulkAction::make()->permission('area.destroy'),
@@ -46,8 +44,6 @@ class AreaTable extends TableAbstract
                 $query->select([
                     'id',
                     'name',
-                    'created_at',
-                    'status',
                 ]);
             });
     }

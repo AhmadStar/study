@@ -11,11 +11,9 @@ use Botble\Table\BulkChanges\CreatedAtBulkChange;
 use Botble\Table\BulkChanges\TextBulkChange;
 use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\Column;
-use Botble\Table\Columns\CreatedAtColumn;
-use Botble\Table\Columns\IdColumn;
-use Botble\Table\Columns\StatusColumn;
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
+use Botble\Base\Facades\Assets;
 
 class PersonTable extends TableAbstract
 {
@@ -29,26 +27,25 @@ class PersonTable extends TableAbstract
                 DeleteAction::make()->route('person.destroy'),
             ])
             ->addColumns([
-                IdColumn::make(),
-                Column::make('first_name')->title('الاسم الأول')->linkToEdit(),
-                Column::make('last_name')->title('اسم العائلة'),
+                Column::make('name')->title('الاسم')->linkToEdit(),
                 Column::make('gender')->title('الجنس'),
                 Column::make('date_of_birth')->title('تاريخ الميلاد'),
-                Column::make('relationship')->title('العلاقة بالعائلة'),
-                Column::make('occupation')->title('الوظيفة'),
-                StatusColumn::make(),
-                CreatedAtColumn::make(),
             ])
             ->addBulkActions([
                 DeleteBulkAction::make()->permission('person.destroy'),
             ])
             ->addBulkChanges([
-                TextBulkChange::make()->name('first_name')->title('الاسم الأول'),
                 StatusBulkChange::make(),
                 CreatedAtBulkChange::make(),
             ])
             ->queryUsing(function (Builder $query) {
-                $query->select(['id','first_name','last_name','gender','date_of_birth','relationship','occupation','status','created_at']);
+                $query->select(['id','name','gender','date_of_birth']);
             });
+
+            Assets::addStylesDirectly("
+                <style>
+                    table.table thead th { text-align: right !important; }
+                </style>
+            ");
     }
 }

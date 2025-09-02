@@ -11,7 +11,6 @@ class FamilyRequest extends Request
     public function rules(): array
     {
         return [
-            'family_number' => ['required', 'string', 'max:220'],
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

@@ -16,6 +16,7 @@ use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\StatusColumn;
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
+use Botble\Base\Facades\Assets;
 
 class FamilyTable extends TableAbstract
 {
@@ -29,23 +30,30 @@ class FamilyTable extends TableAbstract
                 DeleteAction::make()->route('family.destroy'),
             ])
             ->addColumns([
-                IdColumn::make(),
-                Column::make('family_code')->title('كود العائلة')->linkToEdit(),
-                Column::make('apartment_id')->title('الشقة'),
-                Column::make('notes')->title('ملاحظات'),
-                StatusColumn::make(),
-                CreatedAtColumn::make(),
+                Column::make('head_name')->title('اسم رب الأسرة'),
+                Column::make('family_code')->title('كود العائلة'),
+                Column::make('smember_name')->title('اسم عنصر الدراسات'),
+                Column::make('building.name')->title('البناء'),
+                Column::make('count_family_members')->title('عدد افراد العائلة'),
             ])
             ->addBulkActions([
                 DeleteBulkAction::make()->permission('family.destroy'),
             ])
             ->addBulkChanges([
-                TextBulkChange::make()->name('family_code')->title('كود العائلة'),
                 StatusBulkChange::make(),
                 CreatedAtBulkChange::make(),
             ])
             ->queryUsing(function (Builder $query) {
-                $query->select(['id','apartment_id','family_code','notes','status','created_at']);
+                $query->select(['id','family_code','smember_name','building_id','head_name','count_family_members'])->with('building');
             });
+
+            Assets::addStylesDirectly("
+                <style>
+                    table.table thead th { text-align: right !important; }
+                </style>
+            ");
+
     }
 }
+
+
