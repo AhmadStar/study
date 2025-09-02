@@ -88,6 +88,7 @@
 
         data: {
             // map + data
+
             map: null,
             buildingTypes: (window.BUILDING_TYPES || [
                 { value: 'residential',    label: 'بناء سكني' },
@@ -133,7 +134,8 @@
             saving: false,
             successMsg: null,
             errorMsg: null,
-
+            fetchCtl: null,
+            loadingBuildings: false,
             // form state
             form: {
                 name: '',
@@ -203,9 +205,10 @@
             self.loadAreas();
 
             // Load buildings (from window or via fetch)
-            self.loadBuildings().then(function () {
-                self.drawBuildings();
-            });
+            // self.loadBuildings().then(function () {
+            //     self.drawBuildings();
+            // });
+            self.refreshBuildings();
         },
 
         methods: {

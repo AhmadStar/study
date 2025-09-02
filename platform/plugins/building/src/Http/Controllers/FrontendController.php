@@ -10,12 +10,69 @@ use Illuminate\Http\Request;
 
 class FrontendController extends BaseController
 {
-    public function map()
+    public function map(Request $request)
     {
         $buildings = Building::with('persons')->get();
 
+        if($request->has('test'))
+            return view('plugins/building::map-old', ['buildings' => $buildings])->render();
+            else
         return view('plugins/building::map', ['buildings' => $buildings])->render();
     }
+    public function getAllBuildings(Request $request)
+    {
+        // Optional validation (tweak as needed)
+        $request->validate([
+            'building_type' => ['nullable'],           // string | array
+            'is_empty'      => ['nullable', 'boolean'],
+            'floors_count'  => ['nullable', 'integer'],
+            // Optional range support:
+            'min_floors'    => ['nullable', 'integer'],
+            'max_floors'    => ['nullable', 'integer'],
+        ]);
+
+        $query = Building::query();
+
+        // building_type filter (supports: ?building_type=residential
+        //  or ?building_type=residential,commercial or building_type[]=residential&building_type[]=commercial)
+        if ($request->filled('building_type')) {
+            $types = is_array($request->building_type)
+                ? $request->building_type
+                : array_map('trim', explode(',', (string) $request->building_type));
+            $query->whereIn('building_type', $types);
+        }
+
+        // is_empty filter (supports 1/0, true/false, yes/no, on/off)
+        if ($request->has('is_empty') && $request->is_empty !== '') {
+            $query->where('is_empty', $request->boolean('is_empty'));
+        }
+
+        // floors_count exact match: ?floors_count=3
+        if ($request->filled('floors_count')) {
+            $query->where('floors_count', (int) $request->floors_count);
+        }
+
+        // (optional) range support: ?min_floors=3&max_floors=6
+        if ($request->filled('min_floors')) {
+            $query->where('floors_count', '>=', (int) $request->min_floors);
+        }
+        if ($request->filled('max_floors')) {
+            $query->where('floors_count', '<=', (int) $request->max_floors);
+        }
+
+        // select only what you return
+        $buildings = $query->get(['id', 'name', 'latitude', 'longitude']);
+
+        return $buildings->map(function ($b) {
+            return [
+                'id'        => $b->id,
+                'name'      => $b->name,
+                'latitude'  => (float) $b->latitude,
+                'longitude' => (float) $b->longitude,
+            ];
+        })->values()->toJson(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
 
     public function getResidents($id)
     {

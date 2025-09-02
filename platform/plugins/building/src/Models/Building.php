@@ -25,7 +25,7 @@ class Building extends BaseModel
         'building_number',
         'is_empty',
         'floors_count',
-        'is_empty',
+
     ];
 
     public function persons()

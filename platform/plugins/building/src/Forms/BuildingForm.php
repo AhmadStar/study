@@ -6,6 +6,7 @@ use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Building\Enums\BuildingTypeEnum;
 use Botble\Building\Http\Requests\BuildingRequest;
 use Botble\Building\Models\Building;
 use Botble\Area\Models\Area;
@@ -21,6 +22,14 @@ class BuildingForm extends FormAbstract
                 ->label('القطاع')
                 ->choices(Area::pluck('name', 'id')->toArray())
                 ->required())
+
+            ->add('building_type', \Botble\Base\Forms\Fields\SelectField::class, SelectFieldOption::make()
+                ->label('نوع البناء')
+                ->placeholder('اختر النوع…')
+                ->choices(\Botble\Building\Enums\BuildingTypeEnum::labels())
+                ->searchable()
+                ->required())
+
             ->add('name', \Botble\Base\Forms\Fields\TextField::class, TextFieldOption::make()
                 ->label('رقم البناء')
                 ->required())

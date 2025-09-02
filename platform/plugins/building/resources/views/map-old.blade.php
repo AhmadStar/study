@@ -1,0 +1,241 @@
+@extends('core/base::layouts.master')
+
+@section('content')
+    {{-- CSRF for AJAX --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+
+        #fam_is_featured_person{
+            margin-right: -15px;
+        }
+        /* ======= Filters pills (awesome style) ======= */
+        .filters-bar {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            margin: 10px 0 14px; align-items: center;
+        }
+        .pill-filter { position: relative; }
+        .pill-filter input[type="checkbox"] {
+            position: absolute; opacity: 0; pointer-events: none;
+        }
+        .pill-filter label {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 12px; border-radius: 999px;
+            border: 1px solid #d0d7de; cursor: pointer; user-select: none;
+            background: #fff; font-weight: 600; font-size: 13px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04);
+            transition: all .18s ease-in-out;
+        }
+        .pill-filter label i { font-size: 16px; }
+        .pill-filter input:checked + label {
+            background: linear-gradient(180deg,#f0f7ff,#e2f0ff);
+            border-color: #9ed0ff; box-shadow: 0 2px 6px rgba(30,144,255,.18);
+        }
+        .pill-filter input:focus + label { outline: 2px solid #9ed0ff55; }
+        .pill-filter label .count { font-weight: 700; opacity: .6; }
+        .filters-actions {
+            margin-inline-start: auto; display: flex; gap: 8px;
+        }
+        .filters-actions button {
+            border: 1px solid #ced4da; background: #fff; border-radius: 8px;
+            padding: 6px 10px; cursor: pointer; font-size: 13px;
+        }
+        .filters-actions button:hover { background: #f8f9fa; }
+
+        /* Residents Modal overlay */
+        #residentsModalContent p {
+            margin-bottom: 5px;
+        }
+
+        .hr,
+        hr {
+            margin: 1rem 0;
+        }
+
+        #residentsModalContent h3 {
+            color: rgb(13, 110, 253);
+        }
+
+        #residentsModalOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            /* hidden initially */
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        /* Residents Modal container */
+        #residentsModal {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+            position: relative;
+        }
+
+        /* Close button */
+        #residentsModalClose {
+            position: absolute;
+            top: 5px;
+            left: 15px;
+            font-size: 28px;
+            color: #888;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #residentsModalClose:hover {
+            color: #333;
+        }
+
+        /* List styling inside modal (avatars, links) */
+        #residentsModal ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #residentsModal li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #residentsModal img.avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        #residentsModal .avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ccc;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        #residentsModal a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        #residentsModal a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    <div id="mapBuilding">
+        <div id="filtersBar" class="filters-bar" dir="rtl"></div>
+
+        {{-- Map container (button injected by JS) --}}
+        <div id="map" style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden;"></div>
+
+        {{-- Residents Modal HTML (used by map-vue.js) --}}
+        <div id="residentsModalOverlay">
+            <div id="residentsModal">
+                <span id="residentsModalClose">&times;</span>
+                <div id="residentsModalContent"></div>
+            </div>
+        </div>
+        @include('plugins/building::partials.family-create-modal')
+
+    </div>
+@endsection
+
+@push('footer')
+    <script>
+        <?php $areas = \Botble\Area\Models\Area::query()
+            ->select(['id', 'name'])
+            ->where('status', \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
+            ->orderBy('name')
+            ->get(); ?>
+        window.areas = {!! collect($areas)->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'name' => $b->name,
+                ];
+            })->values()->toJson(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!};
+        window.ROUTES = {
+            areas: "{{ route('building.areas.index') }}",
+            create: "{{ route('building.create.from.map') }}",
+            residentsBase: "{{ url('/building-info') }}", // used as /building/{id}/residents
+
+            // Admin bases (adjust if your admin prefix is different)
+            buildingEditBase: "{{ url('/admin/buildings') }}", // /{id}/edit
+            familyEditBase: "{{ url('/admin/families') }}", // /{id}/edit
+            familyDeleteBase: "{{ url('/admin/families') }}", // /{id} with DELETE
+        };
+    </script>
+
+    {{-- Optionally pass buildings to JS to avoid an extra request --}}
+    @if (!empty($buildings))
+        <script>
+            window.BUILDINGS = {!! collect($buildings)->map(function ($b) {
+                    return [
+                        'id' => $b->id,
+                        'name' => $b->name,
+                        'latitude' => (float) $b->latitude,
+                        'longitude' => (float) $b->longitude,
+                    ];
+                })->values()->toJson(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!};
+        </script>
+    @endif
+
+    <style>
+        .build-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px
+        }
+
+        .family-style {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px
+        }
+
+        @media (max-width: 768px) {
+            .build-header {
+                flex-wrap: wrap;
+            }
+
+            .family-style {
+                flex-wrap: wrap;
+            }
+
+        }
+    </style>
+
+    {{-- Google Maps JS API --}}
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBokt_jID9DLiGm7hbjYfVojPRUnXE-2ig"></script>
+
+    {{-- Vue 2 (same build your theme uses) --}}
+    <script src="https://study.alkhaleej-best.com/public/themes/ripple/js/vue.js"></script>
+
+    {{-- Main map logic (create button, modal, save building, residents, circles) --}}
+    <script src="https://study.alkhaleej-best.com/public/themes/ripple/js/map-vue.js?v={{ time() }}"></script>
+@endpush

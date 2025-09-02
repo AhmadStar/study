@@ -11,6 +11,10 @@ AdminHelper::registerRoutes(function () {
     });
 });
 Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => ['web', 'auth']], function () {
+
+    Route::get('/all-buildings', [FrontendController::class, 'getAllBuildings'])
+        ->name('buildings.all');
+
     Route::post('buildings/from-map', [
         'as' => 'building.create.from.map',
         'uses' => 'Botble\Building\Http\Controllers\BuildingController@storeFromMap',

@@ -7,4 +7,5 @@ Route::group(['namespace' => 'Botble\Building\Http\Controllers', 'middleware' =>
     Route::get('neighborhood-map', [FrontendController::class, 'map'])->name('neighborhood.map');
     Route::get('person/{id}', [FrontendController::class, 'personDetail'])->name('person.detail');
     Route::get('building/{id}/residents', [FrontendController::class, 'getResidents'])->name('building.residents');
+    
 });

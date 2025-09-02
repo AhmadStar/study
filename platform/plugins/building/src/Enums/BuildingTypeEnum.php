@@ -17,15 +17,40 @@ use Illuminate\Support\HtmlString;
  */
 class BuildingTypeEnum extends Enum
 {
-public const SECURITY_POINT = 'security_point';     // نقطة امنية
-public const RESIDENTIAL    = 'residential';        // بناء سكني
-public const COMMERCIAL     = 'commercial';         // بناء تجاري
-public const USABLE_HQ      = 'usable_hq';          // مقر يمكن الاستفادة منه
-public const SLAUGHTER_SITE = 'slaughter_site';     // موقع مجزرة
-public const SECURITY_EVENT = 'security_event';     // موقع حدث امني
-public const MILITARY_POINT = 'military_point';     // نقطة عسكرية
+public const SECURITY_POINT = 'security_point';   // نقطة أمنية
+public const RESIDENTIAL    = 'residential';      // بناء سكني
+public const COMMERCIAL     = 'commercial';       // بناء تجاري
+public const USABLE_HQ      = 'usable_hq';        // مقر قابل للاستخدام
+public const SLAUGHTER_SITE = 'slaughter_site';   // موقع مجزرة
+public const SECURITY_EVENT = 'security_event';   // حدث أمني
+public const MILITARY_POINT = 'military_point';   // نقطة عسكرية
 
+    // If you keep translations, this is ignored because we override label()/labels().
     public static $langPath = 'plugins/building::building.types';
+
+    /**
+     * Arabic labels for dropdowns etc.
+     */
+    public static function labels(): array
+    {
+        return [
+            self::SECURITY_POINT => 'نقطة أمنية',
+            self::RESIDENTIAL    => 'بناء سكني',
+            self::COMMERCIAL     => 'بناء تجاري',
+            self::USABLE_HQ      => 'مقر قابل للاستخدام',
+            self::SLAUGHTER_SITE => 'موقع مجزرة',
+            self::SECURITY_EVENT => 'حدث أمني',
+            self::MILITARY_POINT => 'نقطة عسكرية',
+        ];
+    }
+
+    /**
+     * Single label (Arabic).
+     */
+    public function label(): string
+    {
+        return static::labels()[$this->value] ?? (string) $this->value;
+    }
 
     public function toHtml(): HtmlString|string
     {
