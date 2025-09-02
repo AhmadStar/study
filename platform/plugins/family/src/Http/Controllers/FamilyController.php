@@ -130,6 +130,16 @@ public function registerFamily(RegisterFamilyRequest $request)
 
             'is_featured_person'   => ['sometimes', 'boolean'],
             'featured_person'      => ['nullable', 'string', 'max:255', 'required_if:is_featured_person,1'],
+
+            'is_empty'   => ['sometimes', 'boolean'],
+            'need_review'   => ['sometimes', 'boolean'],
+            'head_name'            => ['nullable','string','max:255'],     // إسـم رب الأسرة
+            'nationality'          => ['nullable','string','max:255'],     // الجنسية
+            'birth_place'          => ['nullable','string','max:255'],     // مكان الولادة
+            'birth_date'           => ['nullable','date','before:tomorrow'],// تاريخ الولادة
+            'civil_registry'       => ['nullable','string','max:255'],     // القيد
+            'national_id'          => ['nullable','string','max:255'],     // الرقم الوطني
+            'father_occupation'    => ['nullable','string','max:255'],     // مهنة الأب
         ])->validate();
 
         $validated['is_featured_person'] = $request->boolean('is_featured_person');

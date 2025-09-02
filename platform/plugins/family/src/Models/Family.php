@@ -29,6 +29,11 @@ class Family extends BaseModel
         'is_featured_person',
         'featured_person',
         'house_type', // نوع ملكية العقار: ملك، ايجار، غير ذلك
+        'is_empty',
+        'need_review',
+
+        'head_name', 'nationality', 'birth_place', 'birth_date',
+        'civil_registry', 'national_id', 'father_occupation',
     ];
 
     protected $casts = [

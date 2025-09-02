@@ -85,8 +85,44 @@
             <input type="text" name="phone" value="" class="form-control">
         </div>
     </div>
+<hr>
+        {{-- حقول بيانات رب الأسرة --}}
+        <div style="grid-column:1 / span 2">
+            <label>إسـم رب الأسرة</label>
+            <input type="text" class="form-control" name="head_name" id="fam_head_name">
+        </div>
 
-    <div class="row">
+        <div>
+            <label>الجنسية</label>
+            <input type="text" class="form-control" name="nationality" id="fam_nationality">
+        </div>
+
+        <div>
+            <label>مكان الولادة</label>
+            <input type="text" class="form-control" name="birth_place" id="fam_birth_place">
+        </div>
+
+        <div>
+            <label>تاريخ الولادة</label>
+            <input type="date" class="form-control" name="birth_date" id="fam_birth_date">
+        </div>
+
+        <div>
+            <label>القيد</label>
+            <input type="text" class="form-control" name="civil_registry" id="fam_civil_registry">
+        </div>
+
+        <div>
+            <label>الرقم الوطني</label>
+            <input type="text" class="form-control" name="national_id" id="fam_national_id">
+        </div>
+
+        <div style="grid-column:1 / span 2">
+            <label>مهنة الأب</label>
+            <input type="text" class="form-control" name="father_occupation" id="fam_father_occupation">
+        </div>
+<hr>
+        <div class="row">
         <div class="col-md-6 mb-3">
             <label class="form-label">ملاحظات</label>
             <textarea name="notes" class="form-control"></textarea>

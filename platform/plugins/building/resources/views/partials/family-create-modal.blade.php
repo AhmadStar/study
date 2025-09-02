@@ -33,7 +33,7 @@
             <input type="hidden" id="fam_building_id" name="building_id" :value="buildingCreated.id">
             {{-- If you want to tie family to an apartment later, you can add a dynamic select via JS --}}
 
-            
+
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                 <div>
                     <label>الاسم </label>
@@ -108,6 +108,42 @@
                         <option value="غير ذلك">غير ذلك</option>
                     </select>
                 </div>
+
+                <hr>
+                {{-- حقول بيانات رب الأسرة --}}
+                <div style="grid-column:1 / span 2">
+                    <label>إسـم رب الأسرة</label>
+                    <input type="text" class="form-control" name="head_name" id="fam_head_name">
+                </div>
+
+                <div>
+                    <label>الجنسية</label>
+                    <input type="text" class="form-control" name="nationality" id="fam_nationality">
+                </div>
+
+                <div>
+                    <label>مكان الولادة</label>
+                    <input type="text" class="form-control" name="birth_place" id="fam_birth_place">
+                </div>
+
+                <div>
+                    <label>تاريخ الولادة</label>
+                    <input type="date" class="form-control" name="birth_date" id="fam_birth_date">
+                </div>
+
+                <div>
+                    <label>القيد</label>
+                    <input type="text" class="form-control" name="civil_registry" id="fam_civil_registry">
+                </div>
+
+                <div>
+                    <label>الرقم الوطني</label>
+                    <input type="text" class="form-control" name="national_id" id="fam_national_id">
+                </div>
+                <div style="grid-column:1 / span 2">
+                    <label>مهنة الأب</label>
+                    <input type="text" class="form-control" name="father_occupation" id="fam_father_occupation">
+                </div>
                 <div>
                     <label>الحالة</label>
                     <select class="form-select" name="status" id="fam_status">
@@ -117,9 +153,31 @@
                     </select>
                 </div>
 
+                <hr>
                 <div style="grid-column:1 / span 2">
                     <label>العنوان</label>
                     <input type="text" class="form-control" name="address" id="fam_address">
+                </div>
+                {{-- حالة الشقة فارغة؟ --}}
+                <div>
+                    {{-- hidden لإرسال 0 عند عدم التفعيل --}}
+                    <input type="hidden" name="is_empty" value="0">
+                    <label class="form-check form-switch" style="padding-right: 2.5rem; display:flex; align-items:center; gap:10px">
+                        <input class="form-check-input" type="checkbox"
+                               id="fam_is_empty" name="is_empty" value="1">
+                        <span style="margin-right:40px">هل الشقة <strong>فارغة</strong>؟</span>
+                    </label>
+                </div>
+
+                {{-- يحتاج مراجعة؟ --}}
+                <div>
+                    {{-- hidden لإرسال 0 عند عدم التفعيل --}}
+                    <input type="hidden" name="need_review" value="0">
+                    <label class="form-check form-switch" style="padding-right: 2.5rem; display:flex; align-items:center; gap:10px">
+                        <input class="form-check-input" type="checkbox"
+                               id="fam_need_review" name="need_review" value="1">
+                        <span style="margin-right:40px">يحتاج إلى <strong>مراجعة</strong>؟</span>
+                    </label>
                 </div>
 
                 <div style="grid-column:1 / span 2">
