@@ -18,6 +18,7 @@ class Family extends BaseModel
         'head_name',
         'family_number',
         'floor_number',
+        'family_name',
         'family_code', // codes [A,B,C,D,E]
         'region_id',
         'building_id',

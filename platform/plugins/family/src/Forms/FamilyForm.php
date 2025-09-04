@@ -137,8 +137,13 @@ class FamilyForm extends FormAbstract
             ])
             ->add('head_name', \Botble\Base\Forms\Fields\TextField::class, [
                 'label' => 'اسم رب الأسرة',
-                'required' => true,
+                'required' => true,  'wrapper' => ['class' => 'half-width']
             ])
+            ->add('family_name', \Botble\Base\Forms\Fields\TextField::class, [
+                'label' => 'الكنية(العائلة)',
+                'required' => true,  'wrapper' => ['class' => 'half-width']
+            ])
+
             ->add('custom_br1', \Botble\Base\Forms\Fields\HtmlField::class, [
                 'html' => '<br>'
             ])

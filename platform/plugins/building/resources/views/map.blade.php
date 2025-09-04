@@ -50,6 +50,21 @@
                 <input id="filter_floors_count" type="number" min="0" class="form-control"
                        placeholder="مثال: 3" style="width:120px" v-model.number="floorsCount">
             </div>
+            <div class="pill" style="flex:1; min-width:220px">
+                <label for="filter_family_head" style="margin:0">اسم ربّ الأسرة</label>
+                <input id="filter_family_head"
+                       type="text"
+                       class="form-control"
+                       placeholder="ابحث باسم ربّ الأسرة…"
+                       v-model.trim="familyHead">
+            </div>
+            <!-- Optional: only-with-families toggle (default ON) -->
+            {{--<div class="pill">--}}
+                {{--<label class="d-inline-flex align-items-center" style="gap:6px;margin:0">--}}
+                    {{--<input type="checkbox" v-model="onlyWithFamilies">--}}
+                    {{--عرض المباني التي تحتوي عائلات فقط--}}
+                {{--</label>--}}
+            {{--</div>--}}
             <div class="filters-actions">
             <button type="button" class="pill" @click="resetFilters">إعادة الضبط</button>
             <span v-if="loading" style="margin-inline-start:auto">جارِ التحميل…</span>
@@ -119,7 +134,8 @@
             activeTypes: [],  // all unchecked by default
             isEmpty: '',
             floorsCount: '',
-
+            familyHead: '',
+//            onlyWithFamilies: true,
             map: null,
             defaultCenter: { lat: 33.481289, lng: 36.311463 },
             defaultZoom: 16,
@@ -141,6 +157,7 @@
             pulseMaxScale: 9,
             pulseStep: 0.15,
             pulseIntervalMs: 50,
+
         },
 
         mounted(){
@@ -163,6 +180,9 @@
             this.modalContent = document.getElementById('residentsModalContent');
             this.modalClose   = document.getElementById('residentsModalClose');
 
+            this.$watch('familyHead', this.debouncedFetch);
+            this.$watch('onlyWithFamilies', this.debouncedFetch);
+
             if (this.modalClose) this.modalClose.addEventListener('click', ()=>this.closeModal());
             if (this.modalOverlay) this.modalOverlay.addEventListener('click', e=>{
                 if (e.target === this.modalOverlay) this.closeModal();
@@ -170,9 +190,23 @@
         },
 
         methods:{
+            resetFilters(){
+                this.activeTypes=[]; this.isEmpty=''; this.floorsCount='';
+                this.familyHead=''; this.onlyWithFamilies=true;
+                this.fetchAndRender();
+            },
+            buildUrl(){
+                const url = new URL(this.apiUrl, window.location.origin);
+                if (this.activeTypes.length) this.activeTypes.forEach(t=>url.searchParams.append('building_type[]', t));
+                if (this.isEmpty !== '') url.searchParams.set('is_empty', this.isEmpty);
+                if (this.floorsCount !== '' && this.floorsCount != null) url.searchParams.set('floors_count', this.floorsCount);
+                if (this.familyHead !== '' && this.familyHead != null) url.searchParams.set('family_head', this.familyHead);
+//                if (this.onlyWithFamilies) url.searchParams.set('only_with_families', '1');
+                return url.toString();
+            },
             // UI helpers
             selectAllTypes(){ this.activeTypes = this.buildingTypes.map(t=>t.value); this.fetchAndRender(); },
-            resetFilters(){ this.activeTypes=[]; this.isEmpty=''; this.floorsCount=''; this.fetchAndRender(); },
+
             debouncedFetch: debounce(function(){ this.fetchAndRender(); }, 250),
 
             pillStyle(type, isActive){
@@ -188,13 +222,13 @@
             },
 
             // data fetch
-            buildUrl(){
-                const url = new URL(this.apiUrl, window.location.origin);
-                if (this.activeTypes.length) this.activeTypes.forEach(t=>url.searchParams.append('building_type[]', t));
-                if (this.isEmpty !== '') url.searchParams.set('is_empty', this.isEmpty);
-                if (this.floorsCount !== '' && this.floorsCount != null) url.searchParams.set('floors_count', this.floorsCount);
-                return url.toString();
-            },
+//            buildUrl(){
+//                const url = new URL(this.apiUrl, window.location.origin);
+//                if (this.activeTypes.length) this.activeTypes.forEach(t=>url.searchParams.append('building_type[]', t));
+//                if (this.isEmpty !== '') url.searchParams.set('is_empty', this.isEmpty);
+//                if (this.floorsCount !== '' && this.floorsCount != null) url.searchParams.set('floors_count', this.floorsCount);
+//                return url.toString();
+//            },
 
             fetchAndRender(){
                 const url = this.buildUrl();

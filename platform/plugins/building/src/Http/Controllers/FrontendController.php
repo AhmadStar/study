@@ -21,20 +21,21 @@ class FrontendController extends BaseController
     }
     public function getAllBuildings(Request $request)
     {
-        // Optional validation (tweak as needed)
+        // Validation
         $request->validate([
-            'building_type' => ['nullable'],           // string | array
-            'is_empty'      => ['nullable', 'boolean'],
-            'floors_count'  => ['nullable', 'integer'],
-            // Optional range support:
-            'min_floors'    => ['nullable', 'integer'],
-            'max_floors'    => ['nullable', 'integer'],
+            'building_type'       => ['nullable'],           // string | array
+            'is_empty'            => ['nullable', 'boolean'],
+            'floors_count'        => ['nullable', 'integer'],
+            'min_floors'          => ['nullable', 'integer'],
+            'max_floors'          => ['nullable', 'integer'],
+            // NEW:
+            'family_head'         => ['nullable', 'string'],
+            'only_with_families'  => ['nullable', 'boolean'],
         ]);
 
         $query = Building::query();
 
-        // building_type filter (supports: ?building_type=residential
-        //  or ?building_type=residential,commercial or building_type[]=residential&building_type[]=commercial)
+        // building_type filter
         if ($request->filled('building_type')) {
             $types = is_array($request->building_type)
                 ? $request->building_type
@@ -42,17 +43,15 @@ class FrontendController extends BaseController
             $query->whereIn('building_type', $types);
         }
 
-        // is_empty filter (supports 1/0, true/false, yes/no, on/off)
+        // is_empty filter
         if ($request->has('is_empty') && $request->is_empty !== '') {
             $query->where('is_empty', $request->boolean('is_empty'));
         }
 
-        // floors_count exact match: ?floors_count=3
+        // floors_count exact/range
         if ($request->filled('floors_count')) {
             $query->where('floors_count', (int) $request->floors_count);
         }
-
-        // (optional) range support: ?min_floors=3&max_floors=6
         if ($request->filled('min_floors')) {
             $query->where('floors_count', '>=', (int) $request->min_floors);
         }
@@ -60,7 +59,20 @@ class FrontendController extends BaseController
             $query->where('floors_count', '<=', (int) $request->max_floors);
         }
 
-        // select only what you return
+        // 🔎 NEW: filter buildings by related families.head_name
+        if ($request->filled('family_head')) {
+            $term = $request->input('family_head');
+            $query->whereHas('families', function ($qq) use ($term) {
+                $qq->where('head_name', 'like', '%' . $term . '%');
+            });
+        }
+
+        // 🧩 NEW: only return buildings that have families
+        if ($request->boolean('only_with_families')) {
+            $query->has('families');
+        }
+
+        // keep payload small for the map
         $buildings = $query->get(['id', 'name', 'latitude', 'longitude']);
 
         return $buildings->map(function ($b) {
@@ -72,6 +84,7 @@ class FrontendController extends BaseController
             ];
         })->values()->toJson(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
+
 
 
     public function getResidents($id)
