@@ -16,11 +16,13 @@ class Area extends BaseModel
         'name',
         'district_id',
         'status',
+        'shape', // <— add this
     ];
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
-        'name' => SafeContent::class,
+        'name'   => SafeContent::class,
+        'shape'  => 'array', // <— JSON cast
     ];
 
     public function district()
