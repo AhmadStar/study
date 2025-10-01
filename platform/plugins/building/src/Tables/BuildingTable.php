@@ -14,6 +14,7 @@ use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Botble\Base\Facades\Assets;
+use Botble\Table\Columns\IdColumn;
 
 class BuildingTable extends TableAbstract
 {
@@ -27,8 +28,9 @@ class BuildingTable extends TableAbstract
             DeleteAction::make()->route('building.destroy'),
         ])
         ->addColumns([
+            IdColumn::make(),
             Column::make('building_number')->title('رقم المبنى'), // سيظهر: رقم المبنى - اسم المنطقة
-            Column::make('area.name')->title('المنطقة'),
+            Column::make('area.name')->title('القطاع'),
             Column::make('floors_count')->title('عدد الطوابق'),
         ])
         ->addBulkActions([
@@ -52,10 +54,7 @@ class BuildingTable extends TableAbstract
                 ->with('area'); // لعمود area.name
         });
 
-        Assets::addStylesDirectly("
-                <style>
-                    table.table thead th { text-align: right !important; }
-                </style>
-            ");
+        Assets::addStylesDirectly(asset('css/custom-datatables.css'));
+
 }
 }

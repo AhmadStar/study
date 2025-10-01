@@ -1,0 +1,11 @@
+{
+    "id": "vendor/street",
+    "name": "Street",
+    "namespace": "Botble\\Street\\",
+    "provider": "Botble\\Street\\Providers\\StreetServiceProvider",
+    "author": "",
+    "url": "",
+    "version": "1.0.0",
+    "description": "",
+    "minimum_core_version": "7.5.7"
+}

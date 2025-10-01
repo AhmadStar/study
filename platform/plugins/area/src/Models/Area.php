@@ -16,7 +16,8 @@ class Area extends BaseModel
         'name',
         'district_id',
         'status',
-        'shape', // <— add this
+        'shape_color',
+        'shape',
     ];
 
     protected $casts = [

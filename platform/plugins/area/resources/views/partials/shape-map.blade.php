@@ -41,16 +41,28 @@
 
         map = new google.maps.Map(mapEl, {
             center: { lat: 33.481289, lng: 36.311463 },
-            zoom: 15,
-            mapTypeId: 'roadmap',
+            zoom: 17,
+            mapTypeId: 'satellite',
         });
+
+        const colorInput = document.querySelector('input[name="shape_color"]');
+        let shapeColor = colorInput ? colorInput.value : '#FF0000';
+
+        if (colorInput) {
+            colorInput.addEventListener('input', () => {
+                shapeColor = colorInput.value;
+                if (currentOverlay) {
+                    currentOverlay.setOptions({ fillColor: shapeColor, strokeColor: shapeColor });
+                }
+            });
+        }
 
         // build drawing manager (controls hidden — we’ll use our buttons)
         drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing ? google.maps.drawing.OverlayType.POLYGON : null, // start in polygon mode if available
             drawingControl: false, // we use custom buttons
-            polygonOptions: { editable: true, draggable: false },
-            rectangleOptions: { editable: true, draggable: false },
+            polygonOptions: { editable: true, draggable: false, fillColor: shapeColor, strokeColor: shapeColor },
+            rectangleOptions: { editable: true, draggable: false, fillColor: shapeColor, strokeColor: shapeColor },
         });
         drawingManager.setMap(map);
 
@@ -147,7 +159,22 @@
 
             const coords = feat.geometry.coordinates[0];
             const path = coords.map(([lng, lat]) => ({ lat, lng }));
-            const polygon = new google.maps.Polygon({ paths: path, editable: true, map });
+
+            const colorInput = document.querySelector('input[name="shape_color"]');
+            let shapeColor = colorInput ? colorInput.value : '#FF0000';
+
+            console.log('ShapeColor on loadInitial:', shapeColor);
+
+            // const polygon = new google.maps.Polygon({ paths: path, editable: true, map });
+            const polygon = new google.maps.Polygon({
+                paths: path,
+                editable: true,
+                map,
+                fillColor: shapeColor || '#FF0000',  // fallback
+                strokeColor: shapeColor || '#FF0000',
+                fillOpacity: 0.35,
+                strokeWeight: 2,
+            });
             polygon.type = 'polygon';
             currentOverlay = polygon;
 

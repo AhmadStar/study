@@ -21,13 +21,13 @@ class PersonServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->loadAndPublishViews()
             ->loadMigrations();
-            
+
             if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
                 \Botble\LanguageAdvanced\Supports\LanguageAdvancedManager::registerModule(Person::class, [
                     'name',
                 ]);
             }
-            
+
             DashboardMenu::default()->beforeRetrieving(function () {
                 DashboardMenu::registerItem([
                     'id' => 'cms-plugins-person',
@@ -36,6 +36,15 @@ class PersonServiceProvider extends ServiceProvider
                     'name' => 'plugins/person::person.name',
                     'icon' => 'ti ti-box',
                     'url' => route('person.index'),
+                    'permissions' => ['person.index'],
+                ]);
+                DashboardMenu::registerItem([
+                    'id' => 'cms-plugins-person',
+                    'priority' => 4,
+                    'parent_id' => null,
+                    'name' => 'الخريطة التفاعلية',
+                    'icon' => 'ti ti-box',
+                    'url' => route('neighborhood.map'),
                     'permissions' => ['person.index'],
                 ]);
             });

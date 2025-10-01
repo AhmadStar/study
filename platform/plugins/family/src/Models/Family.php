@@ -18,6 +18,7 @@ class Family extends BaseModel
         'head_name',
         'family_number',
         'floor_number',
+        'street',
         'family_name',
         'family_code', // codes [A,B,C,D,E]
         'region_id',
@@ -44,7 +45,9 @@ class Family extends BaseModel
         'career',
         'car',
         'weapon',
-        'family_members'
+        'family_members',
+        'security_review',
+        'created_by'
     ];
 
     protected $casts = [

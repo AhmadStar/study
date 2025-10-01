@@ -30,6 +30,7 @@ class FamilyTable extends TableAbstract
                 DeleteAction::make()->route('family.destroy'),
             ])
             ->addColumns([
+                IdColumn::make(),
                 Column::make('head_name')->title('اسم رب الأسرة'),
                 Column::make('family_code')->title('كود العائلة'),
                 Column::make('smember_name')->title('اسم عنصر الدراسات'),
@@ -47,11 +48,7 @@ class FamilyTable extends TableAbstract
                 $query->select(['id','family_code','smember_name','building_id','head_name','count_family_members'])->with('building');
             });
 
-            Assets::addStylesDirectly("
-                <style>
-                    table.table thead th { text-align: right !important; }
-                </style>
-            ");
+            Assets::addStylesDirectly(asset('css/custom-datatables.css'));
 
     }
 }

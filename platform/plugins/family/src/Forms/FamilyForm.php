@@ -13,6 +13,8 @@ use Botble\Family\Models\Family;
 use Botble\Building\Models\Building;
 use Botble\Base\Forms\Fields\RepeaterField;
 use Botble\Base\Forms\FieldOptions\RepeaterFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
+use Botble\Base\Forms\Fields\OnOffField;
 
 class FamilyForm extends FormAbstract
 {
@@ -58,6 +60,18 @@ class FamilyForm extends FormAbstract
             ],
             [
                 'type' => 'text',
+                'label' => __('المهنة'),
+                'attributes' => [
+                    'name' => 'job',
+                    'value' => null,
+                    'options' => [
+                        'class' => 'form-control',
+                        'placeholder' => __('المهنة'),
+                    ],
+                ],
+            ],
+            [
+                'type' => 'text',
                 'label' => __('الحالة الاجتماعية'),
                 'attributes' => [
                     'name' => 'marital_status',
@@ -82,7 +96,7 @@ class FamilyForm extends FormAbstract
                 }
                 .third-width {
                     display: inline-block;
-                    width: 33%;
+                    width: 32%;
                     vertical-align: top;
                 }
                 .third-width:nth-child(3n) {
@@ -91,8 +105,53 @@ class FamilyForm extends FormAbstract
                 .mar-3{
                     margin-right:1% !important;
                 }
+
+
             </style>'
         ]);
+
+        $this->add('custom_js', \Botble\Base\Forms\Fields\HtmlField::class, [
+    'html' => '<script>
+        $(document).ready(function () {
+            let $areaSelect = $(\'select[name="region_id"]\');
+            let areaName = $areaSelect.find("option:selected").text();
+            let $buildingSelect = $(\'select[name="building_id"]\');
+
+            let selectedBuildingId = "' . ($this->getModel()->building_id ?? '') . '";
+
+            function loadBuildings(areaId) {
+                $buildingSelect.empty();
+                if (areaId) {
+                    $.get("' . route('ajax.buildings.by-area') . '", { area_id: areaId }, function (data) {
+                        $.each(data, function (index, building) {
+
+                            console.log(areaName);
+
+                            let optionText = areaName + " " + building.street + " / " + building.name;
+                            let option = new Option(optionText, building.id);
+
+                            if (building.id == selectedBuildingId) {
+                                option.selected = true; // pre-select on edit
+                            }
+
+                            $buildingSelect.append(option);
+                        });
+                        $buildingSelect.trigger(\'change\');
+                    });
+                }
+            }
+
+            $areaSelect.on(\'change\', function () {
+                loadBuildings($(this).val());
+            });
+
+            if ($areaSelect.val()) {
+                loadBuildings($areaSelect.val());
+            }
+        });
+    </script>'
+]);
+
 
         $this
             ->model(Family::class)
@@ -102,25 +161,19 @@ class FamilyForm extends FormAbstract
                 'required' => true,
                 'wrapper' => ['class' => 'half-width']
             ])
-            ->add('region_id', \Botble\Base\Forms\Fields\SelectField::class, [
-                'label' => 'المنطقة .',
-                'choices' => Area::get()->mapWithKeys(function ($area) {
-                    $label = $area->name;
-                    return [$area->id => $label];
-                })->toArray(),
+            ->add('region_id', 'customSelect', [
+                'label' => 'القطاع',
+                'choices' => Area::pluck('name', 'id')->toArray(),
                 'searchable' => true,
                 'required' => true,
-                'wrapper' => ['class' => 'half-width mb-3']
+                'wrapper' => ['class' => 'half-width mb-3'],
             ])
-            ->add('building_id', \Botble\Base\Forms\Fields\SelectField::class, [
-                'label' => 'البناء .',
-                'choices' => Building::with('area')->get()->mapWithKeys(function ($building) {
-                    $label = $building->building_number . ' ' . ($building->area->name ?? '');
-                    return [$building->id => $label];
-                })->toArray(),
+            ->add('building_id', 'customSelect', [
+                'label' => 'البناء',
+                'choices' => [], // will be filled dynamically
                 'searchable' => true,
                 'required' => true,
-                'wrapper' => ['class' => 'half-width']
+                'wrapper' => ['class' => 'half-width'],
             ])
             ->add('cat', \Botble\Base\Forms\Fields\TextField::class, [
                 'label' => 'الطابق',
@@ -137,11 +190,13 @@ class FamilyForm extends FormAbstract
             ])
             ->add('head_name', \Botble\Base\Forms\Fields\TextField::class, [
                 'label' => 'اسم رب الأسرة',
-                'required' => true,  'wrapper' => ['class' => 'half-width']
+                'required' => true,
+                'wrapper' => ['class' => 'half-width']
             ])
             ->add('family_name', \Botble\Base\Forms\Fields\TextField::class, [
                 'label' => 'الكنية(العائلة)',
-                'required' => true,  'wrapper' => ['class' => 'half-width']
+                'required' => true,
+                'wrapper' => ['class' => 'half-width']
             ])
 
             ->add('custom_br1', \Botble\Base\Forms\Fields\HtmlField::class, [
@@ -158,9 +213,9 @@ class FamilyForm extends FormAbstract
                 'wrapper' => ['class' => 'third-width']
             ])
             ->add('birth_date', \Botble\Base\Forms\Fields\TextField::class, [
-                'label' => 'تاريخ الولادة',
-                'value' => now()->format('Y-m-d'),
-                'wrapper' => ['class' => 'third-width mb-3']
+                'label'    => 'تاريخ الولادة',
+                'default_value' => now()->format('Y-m-d'),
+                'wrapper'  => ['class' => 'third-width mb-3'],
             ])
             ->add('civil_registry', \Botble\Base\Forms\Fields\TextField::class, [
                 'label' => 'القيد',
@@ -229,8 +284,14 @@ class FamilyForm extends FormAbstract
             ])
             ->add('notes', \Botble\Base\Forms\Fields\TextareaField::class, [
                 'label' => 'ملاحظات',
-                'wrapper' => ['class' => 'col-12']
+                'wrapper' => ['class' => 'col-12 mb-3']
             ])
+            ->add(
+                'security_review',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label('للمراجعة الأمنية')
+            )
             ->add('status', \Botble\Base\Forms\Fields\SelectField::class, StatusFieldOption::make()->toArray() + [
                 'wrapper' => ['class' => 'col-12']
             ])

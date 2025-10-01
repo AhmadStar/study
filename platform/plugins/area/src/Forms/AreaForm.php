@@ -27,16 +27,21 @@ class AreaForm extends FormAbstract
                 ->required())
             ->add('shape', \Botble\Base\Forms\Fields\HiddenField::class, HiddenFieldOption::make()) // <- stores GeoJSON
             ->add('status', \Botble\Base\Forms\Fields\SelectField::class, StatusFieldOption::make())
+            ->add('shape_color', 'color', [
+                'label' => 'لون الشكل',
+                'label_attr' => ['class' => 'control-label'],
+                'attr' => ['class' => 'form-control', 'value' => $this->getModel()->shape_color ?? '#FF0000'],
+            ])
             ->setBreakFieldPoint('status');
-        // Inject map UI under the form (depends on your setup):
-        $this->addMetaBoxes([
-            'shape-map' => [
-                'title' => 'الخريطة (ارسم المضلع/المستطيل)',
-                'content' => view('plugins/area::partials.shape-map', [
-                    'initialShape' => $this->getModel()->shape ?? null,
-                ])->render(),
-                'priority' => 1,
-            ],
-        ]);
+            // Inject map UI under the form (depends on your setup):
+            $this->addMetaBoxes([
+                'shape-map' => [
+                    'title' => 'الخريطة (ارسم المضلع/المستطيل)',
+                    'content' => view('plugins/area::partials.shape-map', [
+                        'initialShape' => $this->getModel()->shape ?? null,
+                    ])->render(),
+                    'priority' => 1,
+                ],
+            ]);
     }
 }

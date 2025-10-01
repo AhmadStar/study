@@ -14,6 +14,7 @@ use Botble\Table\Columns\Column;
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
 use Botble\Base\Facades\Assets;
+use Botble\Table\Columns\IdColumn;
 
 class PersonTable extends TableAbstract
 {
@@ -27,6 +28,7 @@ class PersonTable extends TableAbstract
                 DeleteAction::make()->route('person.destroy'),
             ])
             ->addColumns([
+                IdColumn::make(),
                 Column::make('name')->title('الاسم')->linkToEdit(),
                 Column::make('gender')->title('الجنس'),
                 Column::make('date_of_birth')->title('تاريخ الميلاد'),
@@ -42,10 +44,7 @@ class PersonTable extends TableAbstract
                 $query->select(['id','name','gender','date_of_birth']);
             });
 
-            Assets::addStylesDirectly("
-                <style>
-                    table.table thead th { text-align: right !important; }
-                </style>
-            ");
+            Assets::addStylesDirectly(asset('css/custom-datatables.css'));
+
     }
 }

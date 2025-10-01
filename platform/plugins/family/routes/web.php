@@ -11,12 +11,34 @@ AdminHelper::registerRoutes(function () {
     });
 });
 
+Route::group(['namespace' => 'Botble\Family\Http\Controllers', 'middleware' => ['web', 'core']], function () {
+
+    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+
+        Route::get('family-filter/list', [
+            'as' => 'family-filter-list',
+            'uses' => 'FamilyController@familyFilterList',
+            'permission' => 'family.index',
+        ]);
+
+        Route::get('family-list/show', [
+            'as' => 'family-show-list',
+            'uses' => 'FamilyController@familyList',
+            'permission' => 'family.index',
+        ]);
+
+
+         });
+
+});
+
+
 Theme::registerRoutes(function (): void {
     Route::group([
         'namespace' => 'Botble\Family\Http\Controllers',
         'middleware' => ['web', 'core'],
     ], function (): void {
-        
+
         Route::group([], function (): void {
             Route::post('/families', [\Botble\Family\Http\Controllers\FamilyController::class, 'storeF'])
                 ->name('family.store');
@@ -24,5 +46,8 @@ Theme::registerRoutes(function (): void {
             Route::get('registerFamily', 'FamilyController@showRegistrationFamilyForm')->name('public.registerFamily');
             Route::post('registerFamily', 'FamilyController@registerFamily')->name('public.registerFamily.post');
         });
+
+        Route::get('ajax/buildings-by-area', [FamilyController::class, 'getBuildingsByArea'])
+            ->name('ajax.buildings.by-area');
     });
 });

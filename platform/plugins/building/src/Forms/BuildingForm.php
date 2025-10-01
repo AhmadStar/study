@@ -22,16 +22,19 @@ class BuildingForm extends FormAbstract
                 ->label('القطاع')
                 ->choices(Area::pluck('name', 'id')->toArray())
                 ->required())
-
+                ->add('street', \Botble\Base\Forms\Fields\TextField::class, [
+                'label' => 'الشارع',
+                'required' => true,
+                'wrapper' => ['class' => 'half-width mb-3']
+            ])
+             ->add('name', \Botble\Base\Forms\Fields\TextField::class, TextFieldOption::make()
+                ->label('رقم البناء')
+                ->required())
             ->add('building_type', \Botble\Base\Forms\Fields\SelectField::class, SelectFieldOption::make()
                 ->label('نوع البناء')
                 ->placeholder('اختر النوع…')
                 ->choices(\Botble\Building\Enums\BuildingTypeEnum::labels())
                 ->searchable()
-                ->required())
-
-            ->add('name', \Botble\Base\Forms\Fields\TextField::class, TextFieldOption::make()
-                ->label('رقم البناء')
                 ->required())
             ->add('floors_count', \Botble\Base\Forms\Fields\TextField::class, TextFieldOption::make()
                 ->label('عدد الطوابق'))
